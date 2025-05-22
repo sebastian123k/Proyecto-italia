@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: #f1f3f5;
+}
+
+/* Hero */
+.hero-banner {
+  height: 45vh;
+  background-image: url('../img/cementerio.webp');
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+/* Botón dorado */
+.btn-gold {
+  background-color: #d4af37;
+  color: #000;
+  font-weight: 600;
+  border: none;
+  transition: all 0.3s ease-in-out;
+}
+
+.btn-gold:hover {
+  background-color: #bfa133;
+  transform: scale(1.03);
+}
+
+/* Paneles */
+.search-panel,
+.results-table {
+  background-color: #fff;
+  border-radius: 1rem;
+}
+
+/* Tabla */
+.table th, .table td {
+  vertical-align: middle;
+  font-size: 0.95rem;
+}
+
+.table-hover tbody tr:hover {
+  background-color: #f8f9fa;
+}

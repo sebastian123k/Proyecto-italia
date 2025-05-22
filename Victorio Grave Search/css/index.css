@@ -1,0 +1,59 @@
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: #f4f4f4;
+}
+
+/* Hero */
+.hero-section {
+  position: relative;
+  height: 60vh;
+  background-image: url('../img/cementerio.webp');
+  background-size: cover;
+  background-position: center;
+}
+
+.hero-section .overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+/* Cards */
+.card-img {
+  height: 260px;
+  background-size: cover;
+  background-position: center;
+  border-radius: 1rem;
+  overflow: hidden;
+  transition: transform 0.3s;
+}
+
+.card-img:hover {
+  transform: scale(1.02);
+}
+
+.card-overlay {
+  background-color: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  height: 100%;
+  padding: 2rem;
+  transition: background-color 0.3s;
+}
+
+.card-overlay:hover {
+  background-color: rgba(0, 0, 0, 0.75);
+}
+
+/* Buttons */
+.btn-sober {
+  background-color: #2c3e50;
+  color: #fff;
+  font-weight: 500;
+  border: none;
+}
+
+.btn-sober:hover {
+  background-color: #1a252f;
+  transform: scale(1.03);
+  transition: 0.3s ease;
+}

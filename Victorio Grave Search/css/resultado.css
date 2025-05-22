@@ -1,0 +1,38 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+}
+
+.navbar-brand {
+  font-weight: bold;
+}
+
+.result-card {
+  border-radius: 1rem;
+  background-color: white;
+}
+
+.map-container {
+  max-height: 400px;
+}
+
+/* Botón dorado */
+.btn-gold {
+  background-color: #d4af37;
+  color: #000;
+  font-weight: 600;
+  border: none;
+  transition: all 0.3s ease-in-out;
+}
+
+.btn-gold:hover {
+  background-color: #b78b00;
+  transform: scale(1.03);
+}
+
+.text-gold {
+  color: #d4af37;
+}
