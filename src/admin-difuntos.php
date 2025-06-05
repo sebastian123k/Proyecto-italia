@@ -10,7 +10,6 @@ if (!isset($_SESSION['usuario_id'])) {
 
 // ----------------------------------------------------
 // Asegurarnos de que exista la carpeta 'photos/'
-// (ubicada un nivel fuera de 'src')
 // ----------------------------------------------------
 $uploadDir = __DIR__ . '/../photos/';
 if (!is_dir($uploadDir)) {
@@ -298,7 +297,7 @@ $conexion->close();
       <a href="admin-usuarios.php">Usuarios</a>
       <a href="admin-tumbas.php" >Tumbas</a>
       <a href="admin-difuntos.php" class="active">Difuntos</a>
-      <a href="admin-manzanas-filas-cuadros.php">Ubicaciones</a>
+      <a href="admin-ubicaciones.php">Ubicaciones</a>
       <a href="logout.php" class="text-danger mt-4">Cerrar Sesión</a>
     </nav>
 

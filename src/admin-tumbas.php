@@ -2,9 +2,7 @@
 session_start();
 require '../php/conection.php';
 
-// ----------------------------------------------------
 // 1. Verificar sesión
-// ----------------------------------------------------
 if (!isset($_SESSION['usuario_id'])) {
     header("Location: admin-login.php");
     exit();
@@ -222,10 +220,10 @@ $conexion->close();
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Panel Admin - Tumbas</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <style>
     body { background-color: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
     .sidebar { background: #111; color: white; min-height: 100vh; padding: 20px; }
@@ -252,7 +250,7 @@ $conexion->close();
       <a href="admin-usuarios.php">Usuarios</a>
       <a href="admin-tumbas.php" class="active">Tumbas</a>
       <a href="admin-difuntos.php">Difuntos</a>
-      <a href="admin-manzanas-filas-cuadros.php">Ubicaciones</a>
+      <a href="admin-ubicaciones.php">Ubicaciones</a>
       <a href="logout.php" class="text-danger mt-4">Cerrar Sesión</a>
     </nav>
 
@@ -682,8 +680,8 @@ $conexion->close();
       let modalElem = document.getElementById('editModal' + rowId);
       modalElem.addEventListener('show.bs.modal', function () {
         // Valores textuales actuales
-        let textualManzana = selManzana.value;             
-        let textualFila    = selFila.getAttribute('data-current');   
+        let textualManzana = selManzana.value;
+        let textualFila    = selFila.getAttribute('data-current');
         let textualCuadro  = selCuadro.getAttribute('data-current');
 
         // Si hay textualManzana, buscamos su ID interno:

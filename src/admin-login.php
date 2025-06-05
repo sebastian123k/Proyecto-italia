@@ -37,10 +37,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Admin Login - Victorio Grave Search</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <style>
     body {
       background-color: #f4f4f4;
@@ -84,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <label for="correo">Correo</label>
     </div>
     <div class="form-floating mb-4">
-      <input type="password" class="form-control" id="pass" name="pass" placeholder="Contraseña" maxlength = 12 required>
+      <input type="password" class="form-control" id="pass" name="pass" placeholder="Contraseña" maxlength="12" required>
       <label for="pass">Contraseña</label>
     </div>
     <button type="submit" class="btn btn-dark w-100">Entrar</button>

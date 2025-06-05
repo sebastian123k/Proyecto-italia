@@ -97,7 +97,7 @@ $conexion->close();
       <a href="admin-usuarios.php" class="active">Admins</a>
       <a href="admin-tumbas.php">Tumbas</a>
       <a href="admin-difuntos.php">Difuntos</a>
-      <a href="admin-manzanas-filas-cuadros.php">Ubicaciones</a>
+      <a href="admin-ubicaciones.php">Ubicaciones</a>
       <a href="logout.php" class="text-danger mt-4">Cerrar Sesión</a>
     </nav>
 
@@ -122,7 +122,7 @@ $conexion->close();
           <input type="email" name="correo" class="form-control" placeholder="Correo" required>
         </div>
         <div class="col-md-4">
-          <input type="password" name="contrasena" class="form-control" placeholder="Contraseña (8-12 caracteres)"  maxlength="12" required>
+          <input type="password" name="contrasena" class="form-control" placeholder="Contraseña (8-12 caracteres)" maxlength="12" required>
         </div>
         <div class="col-12">
           <button type="submit" class="btn btn-dark">Crear Admin</button>
