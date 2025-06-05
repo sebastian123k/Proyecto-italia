@@ -296,9 +296,9 @@ $conexion->close();
         <small>grave search</small>
       </div>
       <a href="admin-usuarios.php">Usuarios</a>
-      <a href="admin-tumbas.php" class="active">Tumbas</a>
-      <a href="admin-difuntos.php">Difuntos</a>
-      <a href="admin-manzanas-filas-cuadros.php" class="active">Ubicaciones</a>
+      <a href="admin-tumbas.php" >Tumbas</a>
+      <a href="admin-difuntos.php" class="active">Difuntos</a>
+      <a href="admin-manzanas-filas-cuadros.php">Ubicaciones</a>
       <a href="logout.php" class="text-danger mt-4">Cerrar Sesión</a>
     </nav>
 

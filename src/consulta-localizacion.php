@@ -54,8 +54,8 @@ $conexion->close();
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/consulta-localizacion.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="../css/consulta-localizacion.css" />
 
   <style>
     body { background-color: #f8f9fa; }
@@ -126,10 +126,14 @@ $conexion->close();
     </div>
   </nav>
 
-  <section class="py-5 bg-light text-center">
-    <h1 class="fw-bold">Búsqueda por Localización</h1>
-    <p class="lead">Encuentra tumbas por manzana, fila o cuadro</p>
+  <section class="py-5 bg-light  text-white text-center bg-image-banner  ">
+    <div class="bg-overlay"></div>
+    <div class="z-1 position-relative">
+      <h1 class="fw-bold">Búsqueda por Localización</h1>
+      <p class="lead">Encuentra tumbas por manzana, fila o cuadro</p>
+    </div>
   </section>
+
 
   <main class="container my-5">
     <div class="form-container">
@@ -183,7 +187,7 @@ $conexion->close();
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script>
+   <script>
     // 1) Convertir datos PHP → JS
     const jsManzanas = <?= json_encode($allManzanas, JSON_UNESCAPED_UNICODE) ?>;
     const jsFilas    = <?= json_encode($allFilas,    JSON_UNESCAPED_UNICODE) ?>;
@@ -254,25 +258,34 @@ $conexion->close();
       const selCuadro  = document.getElementById('selCuadro');
       const divFila    = document.getElementById('divFila');
       const divCuadro  = document.getElementById('divCuadro');
+      const form       = document.getElementById('searchForm');
 
+      // 4.1) Cuando cambia Manzana
       selManzana.addEventListener('change', () => {
         const idM = selManzana.value;
         if (!idM) {
+          // Ocultar y deshabilitar todo
           divFila.style.display = 'none';
           divCuadro.style.display = 'none';
+
           selFila.innerHTML = '<option value="">— Seleccionar —</option>';
-          selCuadro.innerHTML = '<option value="">— Seleccionar —</option>';
           selFila.disabled = true;
+
+          selCuadro.innerHTML = '<option value="">— Seleccionar —</option>';
           selCuadro.disabled = true;
         } else {
+          // Mostrar y poblar Filas
           divFila.style.display = 'block';
           poblarFilas(selFila, idM);
+
+          // Limpiar/deshabilitar Cuadro por si había algo previo
           selCuadro.innerHTML = '<option value="">— Seleccionar —</option>';
           selCuadro.disabled = true;
           divCuadro.style.display = 'none';
         }
       });
 
+      // 4.2) Cuando cambia Fila
       selFila.addEventListener('change', () => {
         const idF = selFila.value;
         if (!idF) {
@@ -283,6 +296,18 @@ $conexion->close();
           divCuadro.style.display = 'block';
           poblarCuadros(selCuadro, idF);
         }
+      });
+
+      // 4.3) **Nuevo**: Restablecer selects al pulsar “Limpiar” (reset)
+      form.addEventListener('reset', () => {
+        // Nota: el reset limpia los valores, pero no dispara los 'change'. Hacemos manualmente:
+        divFila.style.display = 'none';
+        selFila.innerHTML = '<option value="">— Seleccionar —</option>';
+        selFila.disabled = true;
+
+        divCuadro.style.display = 'none';
+        selCuadro.innerHTML = '<option value="">— Seleccionar —</option>';
+        selCuadro.disabled = true;
       });
     });
 
@@ -335,7 +360,7 @@ $conexion->close();
 
     // 8) Cargar marcadores y polígonos
     async function loadMarkers(filters = {}) {
-      // 8.1. Borrar anteriores L.Markers y L.Polygons (no borra tileLayer)
+      // 8.1) Borrar anteriores L.Marker y L.Polygon (no borra tileLayer)
       map.eachLayer(layer => {
         if (layer instanceof L.Marker || layer instanceof L.Polygon) {
           map.removeLayer(layer);
@@ -343,7 +368,7 @@ $conexion->close();
       });
       currentShapes = { manzana: null, fila: null, cuadro: null };
 
-      // 8.2. Obtener difuntos vía AJAX
+      // 8.2) Obtener difuntos vía AJAX
       const qs = new URLSearchParams(filters);
       try {
         const res = await fetch(`../php/getDifuntos.php?${qs}`);
@@ -373,7 +398,7 @@ $conexion->close();
         return;
       }
 
-      // 8.3. Dibujar polígonos: manzana → fila → cuadro
+      // 8.3) Dibujar polígonos: manzana → fila → cuadro
       const idMan = document.getElementById('selManzana').value;
       const idFil = document.getElementById('selFila').value;
       const idCua = document.getElementById('selCuadro').value;
@@ -406,7 +431,7 @@ $conexion->close();
         }
       }
 
-      // 8.4. Ajustar vista: si hay polígonos, fitBounds; si no, vista inicial
+      // 8.4) Ajustar vista: si hay polígonos, fitBounds; si no, vista inicial
       const shapes = Object.values(currentShapes).filter(s => s !== null);
       if (shapes.length > 0) {
         const group = L.featureGroup(shapes);
@@ -448,5 +473,6 @@ $conexion->close();
     // 10) Carga inicial (solo marcadores, sin polígonos)
     loadMarkers();
   </script>
+
 </body>
 </html>

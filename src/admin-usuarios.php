@@ -11,26 +11,36 @@ if (!isset($_SESSION['usuario_id'])) {
 // 2. Procesar formulario de creación
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Evitar undefined index si viene GET o sin ese campo
     $nombre     = trim($_POST['nombre']     ?? '');
     $correo     = trim($_POST['correo']     ?? '');
-    $contrasena =           $_POST['contrasena'] ?? '';
+    $contrasena = $_POST['contrasena'] ?? '';
 
-    // Validar campos
+    // Validaciones
     if ($nombre === '' || $correo === '' || $contrasena === '') {
         $error = 'Todos los campos son obligatorios';
+    } elseif (strlen($contrasena) < 8 || strlen($contrasena) > 12) {
+        $error = 'La contraseña debe tener entre 8 y 12 caracteres';
     } else {
-        // Guardar la contraseña tal cual (texto plano)
-        $stmt = $conexion->prepare(
-            "INSERT INTO admins (Name, correo, contraseña) VALUES (?, ?, ?)"
-        );
-        $stmt->bind_param("sss", $nombre, $correo, $contrasena);
+        // Verificar si el correo ya existe
+        $stmt = $conexion->prepare("SELECT id FROM admins WHERE correo = ?");
+        $stmt->bind_param("s", $correo);
+        $stmt->execute();
+        $stmt->store_result();
 
-        if ($stmt->execute()) {
-            header("Location: admin-usuarios.php?exito=1");
-            exit();
+        if ($stmt->num_rows > 0) {
+            $error = 'Ya existe un administrador con ese correo';
         } else {
-            $error = "Error al crear el usuario: " . $stmt->error;
+            $stmt->close();
+
+            // Insertar nuevo admin
+            $stmt = $conexion->prepare("INSERT INTO admins (Name, correo, contraseña) VALUES (?, ?, ?)");
+            $stmt->bind_param("sss", $nombre, $correo, $contrasena);
+            if ($stmt->execute()) {
+                header("Location: admin-usuarios.php?exito=1");
+                exit();
+            } else {
+                $error = "Error al crear el usuario: " . $stmt->error;
+            }
         }
         $stmt->close();
     }
@@ -49,13 +59,11 @@ if (isset($_GET['eliminar'])) {
 
 // 4. Obtener lista de usuarios
 $usuarios = [];
-// Alias Name→nombre para usar siempre ['nombre']
 $sql = "SELECT id, Name AS nombre, correo FROM admins";
 if ($result = $conexion->query($sql)) {
     $usuarios = $result->fetch_all(MYSQLI_ASSOC);
     $result->close();
 }
-
 $conexion->close();
 ?>
 
@@ -63,7 +71,7 @@ $conexion->close();
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Panel Admin - Usuarios</title>
+  <title>Panel Admin - Admins</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body { background-color: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
@@ -86,7 +94,7 @@ $conexion->close();
         <div class="text-gold fw-bold mt-2">Victorio's</div>
         <small>grave search</small>
       </div>
-      <a href="admin-usuarios.php" class="active">Usuarios</a>
+      <a href="admin-usuarios.php" class="active">Admins</a>
       <a href="admin-tumbas.php">Tumbas</a>
       <a href="admin-difuntos.php">Difuntos</a>
       <a href="admin-manzanas-filas-cuadros.php">Ubicaciones</a>
@@ -95,10 +103,10 @@ $conexion->close();
 
     <!-- Contenido principal -->
     <main class="col-md-9 col-lg-10 p-4">
-      <h3 class="mb-4">Administración de Usuarios</h3>
+      <h3 class="mb-4">Administrador de Admins</h3>
 
       <?php if (isset($_GET['exito'])): ?>
-        <div class="alert alert-success">Usuario creado exitosamente!</div>
+        <div class="alert alert-success">Administrador creado exitosamente!</div>
       <?php endif; ?>
 
       <?php if ($error): ?>
@@ -108,16 +116,16 @@ $conexion->close();
       <!-- Formulario de creación -->
       <form method="POST" class="row g-3 mb-4 bg-white p-3 rounded shadow">
         <div class="col-md-4">
-          <input type="text" name="nombre"     class="form-control" placeholder="Nombre"     required>
+          <input type="text" name="nombre" class="form-control" placeholder="Nombre" required>
         </div>
         <div class="col-md-4">
-          <input type="email" name="correo"     class="form-control" placeholder="Correo"     required>
+          <input type="email" name="correo" class="form-control" placeholder="Correo" required>
         </div>
         <div class="col-md-4">
-          <input type="text" name="contrasena" class="form-control" placeholder="Contraseña" required>
+          <input type="password" name="contrasena" class="form-control" placeholder="Contraseña (8-12 caracteres)"  maxlength="12" required>
         </div>
         <div class="col-12">
-          <button type="submit" class="btn btn-dark">Crear Usuario</button>
+          <button type="submit" class="btn btn-dark">Crear Admin</button>
         </div>
       </form>
 
@@ -139,7 +147,7 @@ $conexion->close();
                 <td>
                   <a href="?eliminar=<?= $usuario['id'] ?>"
                      class="text-danger"
-                     onclick="return confirm('¿Eliminar este usuario?')">
+                     onclick="return confirm('¿Eliminar este administrador?')">
                     Eliminar
                   </a>
                 </td>

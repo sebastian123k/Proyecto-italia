@@ -108,13 +108,6 @@ session_start();
     </div>
   </section>
 
-  <section class="bg-dark text-white py-5">
-    <div class="container text-center">
-      <h4 class="fw-semibold mb-3">¿Necesitas ayuda?</h4>
-      <p>Contáctanos para asistencia personalizada con tu búsqueda.</p>
-      <a href="mailto:contacto@victoriogravesearch.mx" class="btn btn-sober px-4 py-2 rounded-pill mt-2">Enviar Correo</a>
-    </div>
-  </section>
   
   <footer class="bg-secondary text-white text-center py-3">
     <div class="container">

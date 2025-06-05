@@ -96,6 +96,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <body>
 
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm px-4">
+    <a class="navbar-brand d-flex align-items-center" href="../index.php">
+      <img src="../img/logo.png" alt="logo" width="40" height="40" class="me-2">
+      <span class="fs-4 fw-bold">Victorio Grave Search</span>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+  </nav>
+
 
   <div class="register-card text-center">
     <div class="logo justify-content-center">

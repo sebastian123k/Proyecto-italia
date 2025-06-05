@@ -2,7 +2,9 @@
 session_start();
 require '../php/conection.php';
 
+// ----------------------------------------------------
 // 1. Verificar sesión
+// ----------------------------------------------------
 if (!isset($_SESSION['usuario_id'])) {
     header("Location: admin-login.php");
     exit();
@@ -55,51 +57,57 @@ if ($rsC) {
 }
 
 // ----------------------------------------------------
-// 3. PROCESO DE INSERT / UPDATE / DELETE EN TUMBAS
-//    (AHORA MANZANA, FILA, CUADRO SON TEXTOS, NO IDs)
+// 3. PROCESO DE INSERT / UPDATE EN TUMBAS
 // ----------------------------------------------------
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
-    // ----------------------
+    // ------------------------------------------------
     // 3.1. AGREGAR TUMBA
-    // ----------------------
+    // ------------------------------------------------
     if ($action === 'add') {
-        // Recibimos los campos textuales
         $manzana_txt  = trim($_POST['manzana_txt']  ?? '');
         $fila_txt     = trim($_POST['fila_txt']     ?? '');
         $cuadro_txt   = trim($_POST['cuadro_txt']   ?? '');
         $numero       = trim($_POST['numero']       ?? '');
         $cordenadas   = trim($_POST['cordenadas']   ?? '');
 
-        // Validar obligatorios
+        // Validar campos obligatorios
         if ($manzana_txt === '' || $fila_txt === '' || $cuadro_txt === '' || $numero === '') {
             $error = 'Los campos <strong>Manzana</strong>, <strong>Fila</strong>, <strong>Cuadro</strong> y <strong>Número</strong> son obligatorios.';
         } else {
-            // Insertamos tal cual el texto a la tabla 'tumbas'
-            $stmt = $conexion->prepare("
-                INSERT INTO tumbas (manzana, fila, cuadro, numero, cordenadas)
-                VALUES (?, ?, ?, ?, ?)
-            ");
-            $stmt->bind_param("sssss",
-                $manzana_txt,
-                $fila_txt,
-                $cuadro_txt,
-                $numero,
-                $cordenadas
-            );
-            if ($stmt->execute()) {
-                $success = 'Tumba registrada exitosamente.';
-            } else {
-                $error = 'Error al crear la tumba: ' . $conexion->error;
+            // Validar formato de coordenadas (si se ingresó algo)
+            if ($cordenadas !== '') {
+                if (!preg_match('/^\d{1,2}°\d{2}\'\d{2}(\.\d+)?\"[NS] \d{1,3}°\d{2}\'\d{2}(\.\d+)?\"[EW]$/', $cordenadas)) {
+                    $error = 'El formato de las coordenadas es inválido. Usa este formato: 24°09\'10.3"N 110°14\'46.6"W';
+                }
             }
-            $stmt->close();
+
+            if ($error === '') {
+                $stmt = $conexion->prepare("
+                    INSERT INTO tumbas (manzana, fila, cuadro, numero, cordenadas)
+                    VALUES (?, ?, ?, ?, ?)
+                ");
+                $stmt->bind_param("sssss",
+                    $manzana_txt,
+                    $fila_txt,
+                    $cuadro_txt,
+                    $numero,
+                    $cordenadas
+                );
+                if ($stmt->execute()) {
+                    $success = 'Tumba registrada exitosamente.';
+                } else {
+                    $error = 'Error al crear la tumba: ' . $conexion->error;
+                }
+                $stmt->close();
+            }
         }
     }
 
-    // ----------------------
+    // ------------------------------------------------
     // 3.2. EDITAR TUMBA
-    // ----------------------
+    // ------------------------------------------------
     if ($action === 'edit') {
         $edit_id      = (int)($_POST['edit_id']    ?? 0);
         $manzana_txt  = trim($_POST['manzana_txt']  ?? '');
@@ -111,40 +119,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($edit_id <= 0 || $manzana_txt === '' || $fila_txt === '' || $cuadro_txt === '' || $numero === '') {
             $error = 'Todos los campos (ID, Manzana, Fila, Cuadro, Número) son obligatorios para editar.';
         } else {
-            // Verificar que la tumba existe
-            $stmt = $conexion->prepare("SELECT id FROM tumbas WHERE id = ?");
-            $stmt->bind_param("i", $edit_id);
-            $stmt->execute();
-            $stmt->store_result();
-            if ($stmt->num_rows === 0) {
-                $error = 'La tumba que intentas editar no existe.';
-                $stmt->close();
-            } else {
-                $stmt->close();
-                // Hacemos el UPDATE con los textos
-                $stmt = $conexion->prepare("
-                    UPDATE tumbas
-                    SET manzana    = ?,
-                        fila       = ?,
-                        cuadro     = ?,
-                        numero     = ?,
-                        cordenadas = ?
-                    WHERE id = ?
-                ");
-                $stmt->bind_param("sssssi",
-                    $manzana_txt,
-                    $fila_txt,
-                    $cuadro_txt,
-                    $numero,
-                    $cordenadas,
-                    $edit_id
-                );
-                if ($stmt->execute()) {
-                    $success = 'Tumba actualizada correctamente.';
-                } else {
-                    $error = 'Error al actualizar la tumba: ' . $conexion->error;
+            // Verificar formato de coordenadas (si se ingresó algo)
+            if ($cordenadas !== '') {
+                if (!preg_match('/^\d{1,2}°\d{2}\'\d{2}(\.\d+)?\"[NS] \d{1,3}°\d{2}\'\d{2}(\.\d+)?\"[EW]$/', $cordenadas)) {
+                    $error = 'Formato de coordenadas inválido para editar. Ejemplo: 24°09\'10.3"N 110°14\'46.6"W';
                 }
-                $stmt->close();
+            }
+
+            if ($error === '') {
+                // Verificar que la tumba existe
+                $stmt = $conexion->prepare("SELECT id FROM tumbas WHERE id = ?");
+                $stmt->bind_param("i", $edit_id);
+                $stmt->execute();
+                $stmt->store_result();
+                if ($stmt->num_rows === 0) {
+                    $error = 'La tumba que intentas editar no existe.';
+                    $stmt->close();
+                } else {
+                    $stmt->close();
+                    // Hacemos el UPDATE con los textos
+                    $stmt = $conexion->prepare("
+                        UPDATE tumbas
+                        SET manzana    = ?,
+                            fila       = ?,
+                            cuadro     = ?,
+                            numero     = ?,
+                            cordenadas = ?
+                        WHERE id = ?
+                    ");
+                    $stmt->bind_param("ssssi",
+                        $manzana_txt,
+                        $fila_txt,
+                        $cuadro_txt,
+                        $numero,
+                        $cordenadas,
+                        $edit_id
+                    );
+                    if ($stmt->execute()) {
+                        $success = 'Tumba actualizada correctamente.';
+                    } else {
+                        $error = 'Error al actualizar la tumba: ' . $conexion->error;
+                    }
+                    $stmt->close();
+                }
             }
         }
     }
@@ -172,7 +189,6 @@ $filterFila    = trim($_GET['filterFila']    ?? '');
 $filterCuadro  = trim($_GET['filterCuadro']  ?? '');
 $filterNumero  = trim($_GET['filterNumero']  ?? '');
 
-// Construir la consulta dinámica (igual que antes)
 $tumbas = [];
 $sql   = "SELECT id, manzana, fila, cuadro, numero, cordenadas
           FROM tumbas
@@ -227,7 +243,7 @@ $conexion->close();
 <div class="container-fluid">
   <div class="row">
     <!-- Barra lateral -->
-   <nav class="col-md-3 col-lg-2 sidebar">
+    <nav class="col-md-3 col-lg-2 sidebar">
       <div class="text-center mb-4">
         <img src="../img/logo.png" width="40" alt="Logo">
         <div class="text-gold fw-bold mt-2">Victorio's</div>
@@ -236,7 +252,7 @@ $conexion->close();
       <a href="admin-usuarios.php">Usuarios</a>
       <a href="admin-tumbas.php" class="active">Tumbas</a>
       <a href="admin-difuntos.php">Difuntos</a>
-      <a href="admin-manzanas-filas-cuadros.php" class="active">Ubicaciones</a>
+      <a href="admin-manzanas-filas-cuadros.php">Ubicaciones</a>
       <a href="logout.php" class="text-danger mt-4">Cerrar Sesión</a>
     </nav>
 
@@ -277,7 +293,6 @@ $conexion->close();
           <label class="form-label">Fila <span class="text-danger">*</span></label>
           <select id="selFila" name="fila_txt" class="form-select" disabled required>
             <option value="">Primero selecciona manzana</option>
-            <!-- Opciones añadidas por JS -->
           </select>
         </div>
 
@@ -286,21 +301,20 @@ $conexion->close();
           <label class="form-label">Cuadro <span class="text-danger">*</span></label>
           <select id="selCuadro" name="cuadro_txt" class="form-select" disabled required>
             <option value="">Primero selecciona fila</option>
-            <!-- Opciones añadidas por JS -->
           </select>
         </div>
 
         <!-- 1.4 Número de Tumba -->
         <div class="col-md-3">
           <label class="form-label">Número <span class="text-danger">*</span></label>
-          <input type="text" name="numero" class="form-control" placeholder="Ej. 001" required>
+          <input type="number" name="numero" class="form-control" placeholder="Ej. 001" required maxlength="12">
         </div>
 
         <!-- 1.5 Coordenadas -->
         <div class="col-md-6">
           <label class="form-label">Coordenadas</label>
           <input type="text" name="cordenadas" class="form-control"
-                 placeholder="Ej: 24°09'10.4&quot;N 110°14'46.6&quot;W">
+                 placeholder="Ej: 24°09'10.3&quot;N 110°14'46.6&quot;W">
         </div>
 
         <div class="col-12">
@@ -359,7 +373,7 @@ $conexion->close();
           <div class="col-md-3">
             <label class="form-label">Número de tumba</label>
             <input type="text" name="filterNumero" value="<?= htmlspecialchars($filterNumero) ?>"
-                   class="form-control" placeholder="Ej. 001">
+                   class="form-control" placeholder="Ej. 001" maxlength="12">
           </div>
           <div class="col-12 text-end">
             <button type="reset" class="btn btn-outline-secondary">Limpiar</button>
@@ -467,7 +481,6 @@ $conexion->close();
                                       data-current="<?= htmlspecialchars($t['fila']) ?>"
                                       required>
                                 <option value="">Primero selecciona manzana</option>
-                                <!-- Opciones se llenan con JS -->
                               </select>
                             </div>
 
@@ -481,7 +494,6 @@ $conexion->close();
                                       data-current="<?= htmlspecialchars($t['cuadro']) ?>"
                                       required>
                                 <option value="">Primero selecciona fila</option>
-                                <!-- Opciones se llenan con JS -->
                               </select>
                             </div>
 
@@ -489,14 +501,15 @@ $conexion->close();
                             <div class="mb-3">
                               <label class="form-label">Número <span class="text-danger">*</span></label>
                               <input type="text" name="numero" class="form-control"
-                                     value="<?= htmlspecialchars($t['numero']) ?>" required>
+                                     value="<?= htmlspecialchars($t['numero']) ?>" required maxlength="12">
                             </div>
 
                             <!-- 3.5. Coordenadas -->
                             <div class="mb-3">
                               <label class="form-label">Coordenadas</label>
                               <input type="text" name="cordenadas" class="form-control"
-                                     value="<?= htmlspecialchars($t['cordenadas']) ?>">
+                                     value="<?= htmlspecialchars($t['cordenadas']) ?>"
+                                     placeholder="Ej: 24°09'10.3&quot;N 110°14'46.6&quot;W">
                             </div>
 
                           </div> <!-- /.modal-body -->
@@ -669,8 +682,8 @@ $conexion->close();
       let modalElem = document.getElementById('editModal' + rowId);
       modalElem.addEventListener('show.bs.modal', function () {
         // Valores textuales actuales
-        let textualManzana = selManzana.value;             // por ejemplo "105"
-        let textualFila    = selFila.getAttribute('data-current');   // valor initial de data-current
+        let textualManzana = selManzana.value;             
+        let textualFila    = selFila.getAttribute('data-current');   
         let textualCuadro  = selCuadro.getAttribute('data-current');
 
         // Si hay textualManzana, buscamos su ID interno:
@@ -688,6 +701,27 @@ $conexion->close();
 
         // Llenar cuadros con preselección
         poblarCuadros(selCuadro, filaId, textualCuadro);
+      });
+    });
+  });
+
+  // 6.6. VALIDACIÓN DE COORDENADAS EN TODOS LOS FORMULARIOS
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('form').forEach(form => {
+      form.addEventListener('submit', function(e) {
+        const coordInput = this.querySelector('input[name="cordenadas"]');
+        if (coordInput) {
+          const val = coordInput.value.trim();
+          if (val !== '') {
+            // Regex: dd°dd'dd(.dd)"[N/S] ddd°dd'dd(.dd)"[E/W]
+            const regex = /^\d{1,2}°\d{2}'\d{2}(\.\d+)?\"[NS] \d{1,3}°\d{2}'\d{2}(\.\d+)?\"[EW]$/;
+            if (!regex.test(val)) {
+              e.preventDefault();
+              alert('Formato inválido para coordenadas. Ejemplo: 24°09\'10.3\"N 110°14\'46.6\"W');
+              coordInput.focus();
+            }
+          }
+        }
       });
     });
   });
