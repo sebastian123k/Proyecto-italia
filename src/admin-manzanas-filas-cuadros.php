@@ -2,6 +2,16 @@
 session_start();
 require '../php/conection.php';
 
+/**
+ * Valida una coordenada en formato:
+ *  DD°MM'SS.S"S [N|S]  DDD°MM'SS.S"S [E|W]
+ * Ejemplo: 24°09'10.0"N 110°14'47.5"W
+ */
+function isValidCoordinate(string $coord): bool {
+    $pattern = '/^(?:[0-8]?\d|90)°(?:[0-5]\d)\'(?:[0-5]\d(?:\.\d+)?)\"(?:[NS])\s+(?:1[0-7]\d|[0-9]?\d)°(?:[0-5]\d)\'(?:[0-5]\d(?:\.\d+)?)\"(?:[EW])$/';
+    return (bool)preg_match($pattern, $coord);
+}
+
 // 0) Determinamos la pestaña que debe quedar activa
 $activeTab = 'manzanas';
 
@@ -53,45 +63,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $cord3        = trim($_POST['man_cordenada3']   ?? '');
         $cord4        = trim($_POST['man_cordenada4']   ?? '');
 
-        if ($numero === '') {
-            $error = 'El campo <strong>número</strong> es obligatorio para Manzana.';
-        } else {
-            if ($action === 'add-manzana') {
-                $stmt = $conexion->prepare("
-                    INSERT INTO manzana (
-                        numero, cordenada1, cordenada2, cordenada3, cordenada4
-                    ) VALUES (?, ?, ?, ?, ?)
-                ");
-                $stmt->bind_param("sssss", $numero, $cord1, $cord2, $cord3, $cord4);
-                if ($stmt->execute()) {
-                    $success = 'Manzana creada exitosamente.';
-                } else {
-                    $error = 'Error al crear Manzana: ' . $stmt->error;
-                }
-                $stmt->close();
+        // 2.1.1. Validar formato de coordenadas (si no están vacías)
+        foreach (['cord1' => $cord1, 'cord2' => $cord2, 'cord3' => $cord3, 'cord4' => $cord4] as $label => $c) {
+            if ($c !== '' && !isValidCoordinate($c)) {
+                $error = "Formato de coordenada inválido en {$label}. Use algo como: 24°09'10.0\"N 110°14'47.5\"W";
+                break;
+            }
+        }
+
+        if ($error === '') {
+            if ($numero === '') {
+                $error = 'El campo <strong>número</strong> es obligatorio para Manzana.';
             } else {
-                // EDITAR MANZANA
-                $edit_id = (int)($_POST['man_edit_id'] ?? 0);
-                if ($edit_id <= 0) {
-                    $error = 'ID de Manzana inválido para edición.';
-                } else {
+                if ($action === 'add-manzana') {
                     $stmt = $conexion->prepare("
-                        UPDATE manzana
-                        SET
-                            numero     = ?,
-                            cordenada1 = ?,
-                            cordenada2 = ?,
-                            cordenada3 = ?,
-                            cordenada4 = ?
-                        WHERE id = ?
+                        INSERT INTO manzana (
+                            numero, cordenada1, cordenada2, cordenada3, cordenada4
+                        ) VALUES (?, ?, ?, ?, ?)
                     ");
-                    $stmt->bind_param("sssssi", $numero, $cord1, $cord2, $cord3, $cord4, $edit_id);
+                    $stmt->bind_param("sssss", $numero, $cord1, $cord2, $cord3, $cord4);
                     if ($stmt->execute()) {
-                        $success = 'Manzana actualizada correctamente.';
+                        $success = 'Manzana creada exitosamente.';
                     } else {
-                        $error = 'Error al actualizar Manzana: ' . $stmt->error;
+                        $error = 'Error al crear Manzana: ' . $stmt->error;
                     }
                     $stmt->close();
+                } else {
+                    // EDITAR MANZANA
+                    $edit_id = (int)($_POST['man_edit_id'] ?? 0);
+                    if ($edit_id <= 0) {
+                        $error = 'ID de Manzana inválido para edición.';
+                    } else {
+                        $stmt = $conexion->prepare("
+                            UPDATE manzana
+                            SET
+                                numero     = ?,
+                                cordenada1 = ?,
+                                cordenada2 = ?,
+                                cordenada3 = ?,
+                                cordenada4 = ?
+                            WHERE id = ?
+                        ");
+                        $stmt->bind_param("sssssi", $numero, $cord1, $cord2, $cord3, $cord4, $edit_id);
+                        if ($stmt->execute()) {
+                            $success = 'Manzana actualizada correctamente.';
+                        } else {
+                            $error = 'Error al actualizar Manzana: ' . $stmt->error;
+                        }
+                        $stmt->close();
+                    }
                 }
             }
         }
@@ -101,53 +121,63 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // 2.2. ALTA / EDICIÓN DE FILA
     // ---------------------------------------
     if ($action === 'add-fila' || $action === 'edit-fila') {
-        $numero       = trim($_POST['fila_numero']       ?? '');
-        $cord1        = trim($_POST['fila_cordenada1']   ?? '');
-        $cord2        = trim($_POST['fila_cordenada2']   ?? '');
-        $cord3        = trim($_POST['fila_cordenada3']   ?? '');
-        $cord4        = trim($_POST['fila_cordenada4']   ?? '');
-        $idManzana    = (int)($_POST['fila_idManzana']  ?? 0);
+        $numero    = trim($_POST['fila_numero']       ?? '');
+        $cord1     = trim($_POST['fila_cordenada1']   ?? '');
+        $cord2     = trim($_POST['fila_cordenada2']   ?? '');
+        $cord3     = trim($_POST['fila_cordenada3']   ?? '');
+        $cord4     = trim($_POST['fila_cordenada4']   ?? '');
+        $idManzana = (int)($_POST['fila_idManzana']  ?? 0);
 
-        if ($numero === '' || $idManzana <= 0) {
-            $error = 'El <strong>número</strong> y la <strong>Manzana</strong> son obligatorios para Fila.';
-        } else {
-            if ($action === 'add-fila') {
-                $stmt = $conexion->prepare("
-                    INSERT INTO fila (
-                        numero, cordenada1, cordenada2, cordenada3, cordenada4, idManzana
-                    ) VALUES (?, ?, ?, ?, ?, ?)
-                ");
-                $stmt->bind_param("sssssi", $numero, $cord1, $cord2, $cord3, $cord4, $idManzana);
-                if ($stmt->execute()) {
-                    $success = 'Fila creada exitosamente.';
-                } else {
-                    $error = 'Error al crear Fila: ' . $stmt->error;
-                }
-                $stmt->close();
+        // 2.2.1. Validar formato de coordenadas
+        foreach (['cord1' => $cord1, 'cord2' => $cord2, 'cord3' => $cord3, 'cord4' => $cord4] as $label => $c) {
+            if ($c !== '' && !isValidCoordinate($c)) {
+                $error = "Formato de coordenada inválido en {$label}. Use algo como: 24°09'10.0\"N 110°14'47.5\"W";
+                break;
+            }
+        }
+
+        if ($error === '') {
+            if ($numero === '' || $idManzana <= 0) {
+                $error = 'El <strong>número</strong> y la <strong>Manzana</strong> son obligatorios para Fila.';
             } else {
-                // EDITAR FILA
-                $edit_id = (int)($_POST['fila_edit_id'] ?? 0);
-                if ($edit_id <= 0) {
-                    $error = 'ID de Fila inválido para edición.';
-                } else {
+                if ($action === 'add-fila') {
                     $stmt = $conexion->prepare("
-                        UPDATE fila
-                        SET
-                            numero     = ?,
-                            cordenada1 = ?,
-                            cordenada2 = ?,
-                            cordenada3 = ?,
-                            cordenada4 = ?,
-                            idManzana  = ?
-                        WHERE id = ?
+                        INSERT INTO fila (
+                            numero, cordenada1, cordenada2, cordenada3, cordenada4, idManzana
+                        ) VALUES (?, ?, ?, ?, ?, ?)
                     ");
-                    $stmt->bind_param("ssssssi", $numero, $cord1, $cord2, $cord3, $cord4, $idManzana, $edit_id);
+                    $stmt->bind_param("sssssi", $numero, $cord1, $cord2, $cord3, $cord4, $idManzana);
                     if ($stmt->execute()) {
-                        $success = 'Fila actualizada correctamente.';
+                        $success = 'Fila creada exitosamente.';
                     } else {
-                        $error = 'Error al actualizar Fila: ' . $stmt->error;
+                        $error = 'Error al crear Fila: ' . $stmt->error;
                     }
                     $stmt->close();
+                } else {
+                    // EDITAR FILA
+                    $edit_id = (int)($_POST['fila_edit_id'] ?? 0);
+                    if ($edit_id <= 0) {
+                        $error = 'ID de Fila inválido para edición.';
+                    } else {
+                        $stmt = $conexion->prepare("
+                            UPDATE fila
+                            SET
+                                numero     = ?,
+                                cordenada1 = ?,
+                                cordenada2 = ?,
+                                cordenada3 = ?,
+                                cordenada4 = ?,
+                                idManzana  = ?
+                            WHERE id = ?
+                        ");
+                        $stmt->bind_param("ssssssi", $numero, $cord1, $cord2, $cord3, $cord4, $idManzana, $edit_id);
+                        if ($stmt->execute()) {
+                            $success = 'Fila actualizada correctamente.';
+                        } else {
+                            $error = 'Error al actualizar Fila: ' . $stmt->error;
+                        }
+                        $stmt->close();
+                    }
                 }
             }
         }
@@ -157,53 +187,63 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // 2.3. ALTA / EDICIÓN DE CUADRO
     // ---------------------------------------
     if ($action === 'add-cuadro' || $action === 'edit-cuadro') {
-        $numero     = trim($_POST['cua_numero']       ?? '');
-        $cord1      = trim($_POST['cua_cordenada1']   ?? '');
-        $cord2      = trim($_POST['cua_cordenada2']   ?? '');
-        $cord3      = trim($_POST['cua_cordenada3']   ?? '');
-        $cord4      = trim($_POST['cua_cordenada4']   ?? '');
-        $idFila     = (int)($_POST['cua_idFila']     ?? 0);
+        $numero = trim($_POST['cua_numero']       ?? '');
+        $cord1  = trim($_POST['cua_cordenada1']   ?? '');
+        $cord2  = trim($_POST['cua_cordenada2']   ?? '');
+        $cord3  = trim($_POST['cua_cordenada3']   ?? '');
+        $cord4  = trim($_POST['cua_cordenada4']   ?? '');
+        $idFila = (int)($_POST['cua_idFila']     ?? 0);
 
-        if ($numero === '' || $idFila <= 0) {
-            $error = 'El <strong>número</strong> y la <strong>Fila</strong> son obligatorios para Cuadro.';
-        } else {
-            if ($action === 'add-cuadro') {
-                $stmt = $conexion->prepare("
-                    INSERT INTO cuadro (
-                        numero, cordenada1, cordenada2, cordenada3, cordenada4, idFila
-                    ) VALUES (?, ?, ?, ?, ?, ?)
-                ");
-                $stmt->bind_param("sssssi", $numero, $cord1, $cord2, $cord3, $cord4, $idFila);
-                if ($stmt->execute()) {
-                    $success = 'Cuadro creado exitosamente.';
-                } else {
-                    $error = 'Error al crear Cuadro: ' . $stmt->error;
-                }
-                $stmt->close();
+        // 2.3.1. Validar formato de coordenadas
+        foreach (['cord1' => $cord1, 'cord2' => $cord2, 'cord3' => $cord3, 'cord4' => $cord4] as $label => $c) {
+            if ($c !== '' && !isValidCoordinate($c)) {
+                $error = "Formato de coordenada inválido en {$label}. Use algo como: 24°09'10.0\"N 110°14'47.5\"W";
+                break;
+            }
+        }
+
+        if ($error === '') {
+            if ($numero === '' || $idFila <= 0) {
+                $error = 'El <strong>número</strong> y la <strong>Fila</strong> son obligatorios para Cuadro.';
             } else {
-                // EDITAR CUADRO
-                $edit_id = (int)($_POST['cua_edit_id'] ?? 0);
-                if ($edit_id <= 0) {
-                    $error = 'ID de Cuadro inválido para edición.';
-                } else {
+                if ($action === 'add-cuadro') {
                     $stmt = $conexion->prepare("
-                        UPDATE cuadro
-                        SET
-                            numero     = ?,
-                            cordenada1 = ?,
-                            cordenada2 = ?,
-                            cordenada3 = ?,
-                            cordenada4 = ?,
-                            idFila     = ?
-                        WHERE id = ?
+                        INSERT INTO cuadro (
+                            numero, cordenada1, cordenada2, cordenada3, cordenada4, idFila
+                        ) VALUES (?, ?, ?, ?, ?, ?)
                     ");
-                    $stmt->bind_param("ssssssi", $numero, $cord1, $cord2, $cord3, $cord4, $idFila, $edit_id);
+                    $stmt->bind_param("sssssi", $numero, $cord1, $cord2, $cord3, $cord4, $idFila);
                     if ($stmt->execute()) {
-                        $success = 'Cuadro actualizado correctamente.';
+                        $success = 'Cuadro creado exitosamente.';
                     } else {
-                        $error = 'Error al actualizar Cuadro: ' . $stmt->error;
+                        $error = 'Error al crear Cuadro: ' . $stmt->error;
                     }
                     $stmt->close();
+                } else {
+                    // EDITAR CUADRO
+                    $edit_id = (int)($_POST['cua_edit_id'] ?? 0);
+                    if ($edit_id <= 0) {
+                        $error = 'ID de Cuadro inválido para edición.';
+                    } else {
+                        $stmt = $conexion->prepare("
+                            UPDATE cuadro
+                            SET
+                                numero     = ?,
+                                cordenada1 = ?,
+                                cordenada2 = ?,
+                                cordenada3 = ?,
+                                cordenada4 = ?,
+                                idFila     = ?
+                            WHERE id = ?
+                        ");
+                        $stmt->bind_param("ssssssi", $numero, $cord1, $cord2, $cord3, $cord4, $idFila, $edit_id);
+                        if ($stmt->execute()) {
+                            $success = 'Cuadro actualizado correctamente.';
+                        } else {
+                            $error = 'Error al actualizar Cuadro: ' . $stmt->error;
+                        }
+                        $stmt->close();
+                    }
                 }
             }
         }
@@ -482,19 +522,19 @@ $conexion->close();
             </div>
             <div class="col-md-3">
               <label class="form-label">Cordenada 1</label>
-              <input type="text" name="man_cordenada1" class="form-control">
+              <input type="text" name="man_cordenada1" class="form-control" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
             </div>
             <div class="col-md-3">
               <label class="form-label">Cordenada 2</label>
-              <input type="text" name="man_cordenada2" class="form-control">
+              <input type="text" name="man_cordenada2" class="form-control" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
             </div>
             <div class="col-md-3">
               <label class="form-label">Cordenada 3</label>
-              <input type="text" name="man_cordenada3" class="form-control">
+              <input type="text" name="man_cordenada3" class="form-control" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
             </div>
             <div class="col-md-3">
               <label class="form-label">Cordenada 4</label>
-              <input type="text" name="man_cordenada4" class="form-control">
+              <input type="text" name="man_cordenada4" class="form-control" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
             </div>
             <div class="col-12">
               <button type="submit" class="btn btn-dark">Registrar Manzana</button>
@@ -583,19 +623,19 @@ $conexion->close();
                                 </div>
                                 <div class="mb-3">
                                   <label class="form-label">Cordenada 1</label>
-                                  <input type="text" name="man_cordenada1" class="form-control" value="<?= htmlspecialchars($m['cordenada1']) ?>">
+                                  <input type="text" name="man_cordenada1" class="form-control" value="<?= htmlspecialchars($m['cordenada1']) ?>" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
                                 </div>
                                 <div class="mb-3">
                                   <label class="form-label">Cordenada 2</label>
-                                  <input type="text" name="man_cordenada2" class="form-control" value="<?= htmlspecialchars($m['cordenada2']) ?>">
+                                  <input type="text" name="man_cordenada2" class="form-control" value="<?= htmlspecialchars($m['cordenada2']) ?>" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
                                 </div>
                                 <div class="mb-3">
                                   <label class="form-label">Cordenada 3</label>
-                                  <input type="text" name="man_cordenada3" class="form-control" value="<?= htmlspecialchars($m['cordenada3']) ?>">
+                                  <input type="text" name="man_cordenada3" class="form-control" value="<?= htmlspecialchars($m['cordenada3']) ?>" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
                                 </div>
                                 <div class="mb-3">
                                   <label class="form-label">Cordenada 4</label>
-                                  <input type="text" name="man_cordenada4" class="form-control" value="<?= htmlspecialchars($m['cordenada4']) ?>">
+                                  <input type="text" name="man_cordenada4" class="form-control" value="<?= htmlspecialchars($m['cordenada4']) ?>" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
                                 </div>
                               </div>
                               <div class="modal-footer">
@@ -635,19 +675,19 @@ $conexion->close();
             </div>
             <div class="col-md-3">
               <label class="form-label">Cordenada 1</label>
-              <input type="text" name="fila_cordenada1" class="form-control">
+              <input type="text" name="fila_cordenada1" class="form-control" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
             </div>
             <div class="col-md-3">
               <label class="form-label">Cordenada 2</label>
-              <input type="text" name="fila_cordenada2" class="form-control">
+              <input type="text" name="fila_cordenada2" class="form-control" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
             </div>
             <div class="col-md-3">
               <label class="form-label">Cordenada 3</label>
-              <input type="text" name="fila_cordenada3" class="form-control">
+              <input type="text" name="fila_cordenada3" class="form-control" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
             </div>
             <div class="col-md-3">
               <label class="form-label">Cordenada 4</label>
-              <input type="text" name="fila_cordenada4" class="form-control">
+              <input type="text" name="fila_cordenada4" class="form-control" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
             </div>
             <div class="col-md-3">
               <label class="form-label">Manzana <span class="text-danger">*</span></label>
@@ -758,19 +798,19 @@ $conexion->close();
                                 </div>
                                 <div class="mb-3">
                                   <label class="form-label">Cordenada 1</label>
-                                  <input type="text" name="fila_cordenada1" class="form-control" value="<?= htmlspecialchars($f['cordenada1']) ?>">
+                                  <input type="text" name="fila_cordenada1" class="form-control" value="<?= htmlspecialchars($f['cordenada1']) ?>" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
                                 </div>
                                 <div class="mb-3">
                                   <label class="form-label">Cordenada 2</label>
-                                  <input type="text" name="fila_cordenada2" class="form-control" value="<?= htmlspecialchars($f['cordenada2']) ?>">
+                                  <input type="text" name="fila_cordenada2" class="form-control" value="<?= htmlspecialchars($f['cordenada2']) ?>" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
                                 </div>
                                 <div class="mb-3">
                                   <label class="form-label">Cordenada 3</label>
-                                  <input type="text" name="fila_cordenada3" class="form-control" value="<?= htmlspecialchars($f['cordenada3']) ?>">
+                                  <input type="text" name="fila_cordenada3" class="form-control" value="<?= htmlspecialchars($f['cordenada3']) ?>" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
                                 </div>
                                 <div class="mb-3">
                                   <label class="form-label">Cordenada 4</label>
-                                  <input type="text" name="fila_cordenada4" class="form-control" value="<?= htmlspecialchars($f['cordenada4']) ?>">
+                                  <input type="text" name="fila_cordenada4" class="form-control" value="<?= htmlspecialchars($f['cordenada4']) ?>" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
                                 </div>
                                 <div class="mb-3">
                                   <label class="form-label">Manzana <span class="text-danger">*</span></label>
@@ -821,19 +861,19 @@ $conexion->close();
             </div>
             <div class="col-md-3">
               <label class="form-label">Cordenada 1</label>
-              <input type="text" name="cua_cordenada1" class="form-control">
+              <input type="text" name="cua_cordenada1" class="form-control" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
             </div>
             <div class="col-md-3">
               <label class="form-label">Cordenada 2</label>
-              <input type="text" name="cua_cordenada2" class="form-control">
+              <input type="text" name="cua_cordenada2" class="form-control" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
             </div>
             <div class="col-md-3">
               <label class="form-label">Cordenada 3</label>
-              <input type="text" name="cua_cordenada3" class="form-control">
+              <input type="text" name="cua_cordenada3" class="form-control" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
             </div>
             <div class="col-md-3">
               <label class="form-label">Cordenada 4</label>
-              <input type="text" name="cua_cordenada4" class="form-control">
+              <input type="text" name="cua_cordenada4" class="form-control" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
             </div>
             <div class="col-md-3">
               <label class="form-label">Fila <span class="text-danger">*</span></label>
@@ -946,19 +986,19 @@ $conexion->close();
                                 </div>
                                 <div class="mb-3">
                                   <label class="form-label">Cordenada 1</label>
-                                  <input type="text" name="cua_cordenada1" class="form-control" value="<?= htmlspecialchars($c['cordenada1']) ?>">
+                                  <input type="text" name="cua_cordenada1" class="form-control" value="<?= htmlspecialchars($c['cordenada1']) ?>" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
                                 </div>
                                 <div class="mb-3">
                                   <label class="form-label">Cordenada 2</label>
-                                  <input type="text" name="cua_cordenada2" class="form-control" value="<?= htmlspecialchars($c['cordenada2']) ?>">
+                                  <input type="text" name="cua_cordenada2" class="form-control" value="<?= htmlspecialchars($c['cordenada2']) ?>" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
                                 </div>
                                 <div class="mb-3">
                                   <label class="form-label">Cordenada 3</label>
-                                  <input type="text" name="cua_cordenada3" class="form-control" value="<?= htmlspecialchars($c['cordenada3']) ?>">
+                                  <input type="text" name="cua_cordenada3" class="form-control" value="<?= htmlspecialchars($c['cordenada3']) ?>" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
                                 </div>
                                 <div class="mb-3">
                                   <label class="form-label">Cordenada 4</label>
-                                  <input type="text" name="cua_cordenada4" class="form-control" value="<?= htmlspecialchars($c['cordenada4']) ?>">
+                                  <input type="text" name="cua_cordenada4" class="form-control" value="<?= htmlspecialchars($c['cordenada4']) ?>" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
                                 </div>
                                 <div class="mb-3">
                                   <label class="form-label">Fila <span class="text-danger">*</span></label>

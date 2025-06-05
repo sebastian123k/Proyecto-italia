@@ -15,12 +15,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($nombre) || empty($correo) || empty($pass) || empty($pass2)) {
         $error = 'Todos los campos son obligatorios.';
     }
-    // 2) Verificar que las contraseñas coincidan
+    // 2) Verificar que la contraseña tenga entre 8 y 12 caracteres y solo contenga letras y números
+    elseif (!preg_match('/^[A-Za-z0-9]{8,12}$/', $pass)) {
+        $error = 'La contraseña debe tener entre 8 y 12 caracteres y contener solo letras y números.';
+    }
+    // 3) Verificar que las contraseñas coincidan
     elseif ($pass !== $pass2) {
         $error = 'Las contraseñas no coinciden.';
     }
     else {
-        // 3) Verificar que no exista un usuario con ese correo
+        // 4) Verificar que no exista un usuario con ese correo
         $sql_check = "SELECT id FROM usuarios WHERE correo = ?";
         $stmt_check = $conexion->prepare($sql_check);
         $stmt_check->bind_param("s", $correo);
@@ -31,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt_check->close();
         } else {
             $stmt_check->close();
-            // 4) Insertar usuario (contraseña en texto plano, igual que el login)
+            // 5) Insertar usuario (contraseña en texto plano, igual que el login)
             $sql_ins = "INSERT INTO usuarios (nombre, correo, contraseña) VALUES (?, ?, ?)";
             $stmt_ins = $conexion->prepare($sql_ins);
             $stmt_ins->bind_param("sss", $nombre, $correo, $pass);
@@ -104,10 +108,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
       <span class="navbar-toggler-icon"></span>
     </button>
-  </nav>
+</nav>
 
-
-  <div class="register-card text-center">
+<div class="register-card text-center">
     <div class="logo justify-content-center">
       <img src="../img/logo.png" width="40" alt="Logo" />
       Victorio’s Grave Search
@@ -136,12 +139,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <label for="correo">Correo</label>
       </div>
       <div class="form-floating mb-3">
-        <input type="password" class="form-control" id="pass" name="pass" placeholder="Contraseña" required>
+        <input type="password"
+               class="form-control"
+               id="pass"
+               name="pass"
+               placeholder="Contraseña"
+               pattern="[A-Za-z0-9]{8,12}"
+               title="Solo letras y números, de 8 a 12 caracteres"
+               maxlength = 12
+               required>
         <label for="pass">Contraseña</label>
       </div>
       <div class="form-floating mb-4">
         <input type="password" class="form-control" id="pass2" name="pass2"
-               placeholder="Repite la contraseña" required>
+               placeholder="Repite la contraseña"  maxlength = 12 required>
         <label for="pass2">Repetir Contraseña</label>
       </div>
       <button type="submit" class="btn btn-dark w-100">Registrarme</button>
@@ -149,8 +160,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <small>¿Ya tienes cuenta? <a href="inicion-sesion-usuarios.php">Iniciar Sesión</a></small>
       </div>
     </form>
-  </div>
+</div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

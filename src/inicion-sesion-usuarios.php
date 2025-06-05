@@ -95,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <label for="correo">Correo</label>
     </div>
     <div class="form-floating mb-4">
-      <input type="password" class="form-control" id="pass" name="pass" placeholder="Contraseña" required>
+      <input type="password" class="form-control" id="pass" name="pass" placeholder="Contraseña" maxlength = 12 required>
       <label for="pass">Contraseña</label>
     </div>
     <button type="submit" class="btn btn-dark w-100">Entrar</button>
