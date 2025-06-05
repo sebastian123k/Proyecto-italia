@@ -14,27 +14,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Evitar undefined index si viene GET o sin ese campo
     $nombre     = trim($_POST['nombre']     ?? '');
     $correo     = trim($_POST['correo']     ?? '');
-    $contrasena =          $_POST['contrasena'] ?? '';
+    $contrasena =           $_POST['contrasena'] ?? '';
 
     // Validar campos
     if ($nombre === '' || $correo === '' || $contrasena === '') {
         $error = 'Todos los campos son obligatorios';
     } else {
-        // Hashear contraseña
-        $hash = password_hash($contrasena, PASSWORD_DEFAULT);
-        
-        // INSERT usando la columna real "Name"
+        // Guardar la contraseña tal cual (texto plano)
         $stmt = $conexion->prepare(
             "INSERT INTO admins (Name, correo, contraseña) VALUES (?, ?, ?)"
         );
-        $stmt->bind_param("sss", $nombre, $correo, $hash);
-        
+        $stmt->bind_param("sss", $nombre, $correo, $contrasena);
+
         if ($stmt->execute()) {
             header("Location: admin-usuarios.php?exito=1");
             exit();
         } else {
-            $error = "Error al crear el usuario: " . $conexion->error;
+            $error = "Error al crear el usuario: " . $stmt->error;
         }
+        $stmt->close();
     }
 }
 
@@ -44,6 +42,9 @@ if (isset($_GET['eliminar'])) {
     $stmt = $conexion->prepare("DELETE FROM admins WHERE id = ?");
     $stmt->bind_param("i", $id);
     $stmt->execute();
+    $stmt->close();
+    header("Location: admin-usuarios.php");
+    exit();
 }
 
 // 4. Obtener lista de usuarios
@@ -52,9 +53,10 @@ $usuarios = [];
 $sql = "SELECT id, Name AS nombre, correo FROM admins";
 if ($result = $conexion->query($sql)) {
     $usuarios = $result->fetch_all(MYSQLI_ASSOC);
+    $result->close();
 }
 
-$conexion->close();        
+$conexion->close();
 ?>
 
 <!DOCTYPE html>
@@ -80,12 +82,14 @@ $conexion->close();
     <!-- Barra lateral -->
     <nav class="col-md-3 col-lg-2 sidebar">
       <div class="text-center mb-4">
-        <img src="../img/logo.png" width="40">
+        <img src="../img/logo.png" width="40" alt="Logo">
         <div class="text-gold fw-bold mt-2">Victorio's</div>
         <small>grave search</small>
       </div>
-      <a href="#" class="active">Usuarios</a>
+      <a href="admin-usuarios.php" class="active">Usuarios</a>
       <a href="admin-tumbas.php">Tumbas</a>
+      <a href="admin-difuntos.php">Difuntos</a>
+      <a href="admin-manzanas-filas-cuadros.php">Ubicaciones</a>
       <a href="logout.php" class="text-danger mt-4">Cerrar Sesión</a>
     </nav>
 
@@ -93,11 +97,11 @@ $conexion->close();
     <main class="col-md-9 col-lg-10 p-4">
       <h3 class="mb-4">Administración de Usuarios</h3>
 
-      <?php if(isset($_GET['exito'])): ?>
+      <?php if (isset($_GET['exito'])): ?>
         <div class="alert alert-success">Usuario creado exitosamente!</div>
       <?php endif; ?>
 
-      <?php if($error): ?>
+      <?php if ($error): ?>
         <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
       <?php endif; ?>
 
@@ -110,7 +114,7 @@ $conexion->close();
           <input type="email" name="correo"     class="form-control" placeholder="Correo"     required>
         </div>
         <div class="col-md-4">
-          <input type="password" name="contrasena" class="form-control" placeholder="Contraseña" required>
+          <input type="text" name="contrasena" class="form-control" placeholder="Contraseña" required>
         </div>
         <div class="col-12">
           <button type="submit" class="btn btn-dark">Crear Usuario</button>
@@ -128,7 +132,7 @@ $conexion->close();
             </tr>
           </thead>
           <tbody>
-            <?php foreach($usuarios as $usuario): ?>
+            <?php foreach ($usuarios as $usuario): ?>
               <tr>
                 <td><?= htmlspecialchars($usuario['nombre']) ?></td>
                 <td><?= htmlspecialchars($usuario['correo']) ?></td>

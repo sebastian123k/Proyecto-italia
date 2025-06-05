@@ -1,5 +1,5 @@
 <?php
-// resultado.php
+// src/resultado.php
 
 require '../php/conection.php';
 
@@ -9,7 +9,7 @@ if (!$id) {
     exit;
 }
 
-// Consulta actualizada con JOIN y columna 'cordenadas'
+// 1) Obtener datos del difunto
 $sql = "SELECT 
           t.manzana, 
           t.cuadro, 
@@ -21,7 +21,8 @@ $sql = "SELECT
           d.nombre, 
           d.fechaNacimiento, 
           d.fechaDefuncion, 
-          d.Restos 
+          d.Restos,
+          d.imagen
         FROM difuntos d
         JOIN tumbas t ON d.idTumba = t.id
         WHERE d.id = ?";
@@ -29,18 +30,23 @@ $stmt = $conexion->prepare($sql);
 $stmt->bind_param("i", $id);
 $stmt->execute();
 $resultado = $stmt->get_result();
-
 if ($resultado->num_rows === 0) {
     echo "No se encontró el registro.";
     exit;
 }
-
 $fila = $resultado->fetch_assoc();
-
 $stmt->close();
 $conexion->close();
-?>
 
+// 2) Determinar ruta de la foto (URL relativa para el navegador)
+$photoPath = '';
+if (!empty($fila['imagen'])) {
+    $candidate = __DIR__ . '/../photos/' . $fila['imagen'];
+    if (file_exists($candidate)) {
+        $photoPath = '../photos/' . rawurlencode($fila['imagen']);
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -70,6 +76,14 @@ $conexion->close();
       color: #dc3545;
       font-weight: bold;
     }
+    .photo-display {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 2px solid #ddd;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
   </style>
 </head>
 
@@ -87,43 +101,54 @@ $conexion->close();
       <div class="d-flex flex-column flex-md-row align-items-start gap-4">
 
         <div class="text-center">
-          <img src="../img/avatar.png" alt="Foto del fallecido" class="rounded-circle border shadow-sm" width="120" height="120" />
-          <p class="mt-2 small text-muted">Foto ilustrativa</p>
+          <?php if ($photoPath): ?>
+            <img src="<?= $photoPath ?>" alt="Foto del fallecido" class="photo-display" />
+          <?php else: ?>
+            <img src="../img/avatar.png" alt="Foto ilustrativa" class="photo-display" />
+          <?php endif; ?>
+          <?php if ($photoPath): ?>
+            <p class="mt-2 small text-muted">Foto real</p>
+          <?php else: ?>
+            <p class="mt-2 small text-muted">Foto no disponible</p>
+          <?php endif; ?>
         </div>
 
         <div class="flex-grow-1">
           <h4 class="fw-bold mb-3">
             <i class="fas fa-user me-2 text-secondary"></i>
-            <?php echo htmlspecialchars("{$fila['nombre']} {$fila['apellidoPaterno']} {$fila['apellidoMaterno']}"); ?>
+            <?= htmlspecialchars("{$fila['nombre']} {$fila['apellidoPaterno']} {$fila['apellidoMaterno']}") ?>
           </h4>
           <div class="row gy-2">
             <div class="col-md-6">
-              <strong><i class="fas fa-map me-1 text-gold"></i>Manzana:</strong> <?php echo htmlspecialchars($fila['manzana']); ?>
+              <strong><i class="fas fa-map me-1 text-gold"></i>Manzana:</strong> <?= htmlspecialchars($fila['manzana']) ?>
             </div>
             <div class="col-md-6">
-              <strong><i class="fas fa-map me-1 text-gold"></i>Cuadro:</strong> <?php echo htmlspecialchars($fila['cuadro']); ?>
+              <strong><i class="fas fa-map me-1 text-gold"></i>Cuadro:</strong> <?= htmlspecialchars($fila['cuadro']) ?>
             </div>
             <div class="col-md-6">
-              <strong><i class="fas fa-layer-group me-1 text-gold"></i>Fila:</strong> <?php echo htmlspecialchars($fila['fila']); ?>
+              <strong><i class="fas fa-layer-group me-1 text-gold"></i>Fila:</strong> <?= htmlspecialchars($fila['fila']) ?>
             </div>
             <div class="col-md-6">
-              <strong><i class="fas fa-cross me-1 text-gold"></i>Número:</strong> <?php echo htmlspecialchars($fila['numero']); ?>
+              <strong><i class="fas fa-cross me-1 text-gold"></i>Número:</strong> <?= htmlspecialchars($fila['numero']) ?>
             </div>
             <div class="col-md-6">
-              <strong><i class="fas fa-calendar-day me-1 text-gold"></i>Fecha Nacimiento:</strong> <?php echo htmlspecialchars($fila['fechaNacimiento']); ?>
+              <strong><i class="fas fa-calendar-day me-1 text-gold"></i>Fecha Nacimiento:</strong> <?= htmlspecialchars($fila['fechaNacimiento']) ?>
             </div>
             <div class="col-md-6">
-              <strong><i class="fas fa-calendar-day me-1 text-gold"></i>Fecha Defunción:</strong> <?php echo htmlspecialchars($fila['fechaDefuncion']); ?>
+              <strong><i class="fas fa-calendar-day me-1 text-gold"></i>Fecha Defunción:</strong> <?= htmlspecialchars($fila['fechaDefuncion']) ?>
             </div>
             <div class="col-md-6">
-              <strong><i class="fas fa-skull-crossbones me-1 text-gold"></i>Tipo de Restos:</strong> <?php echo htmlspecialchars($fila['Restos']); ?>
+              <strong><i class="fas fa-skull-crossbones me-1 text-gold"></i>Tipo de Restos:</strong> <?= htmlspecialchars($fila['Restos']) ?>
             </div>
           </div>
         </div>
 
-        <div class="text-md-end">
+        <div class="text-md-end d-flex flex-column flex-md-row gap-2 justify-content-md-end">
           <a href="consulta-persona.php" class="btn btn-gold fw-semibold px-4">
             <i class="fas fa-search-location me-2"></i>Otra búsqueda
+          </a>
+          <a href="resultado-pdf.php?id=<?= htmlspecialchars($id) ?>" class="btn btn-primary fw-semibold px-4">
+            <i class="fas fa-file-pdf me-2"></i>Descargar PDF
           </a>
         </div>
       </div>
@@ -138,7 +163,7 @@ $conexion->close();
       <script>
         function dmsToDecimal(dmsStr) {
           const cleaned = dmsStr.trim().replace(/"/g, '').replace(/\s+/g, ' ').replace(/([NSEW])/i, ' $1');
-          const parts = cleaned.match(/^(\d+)°\s*(\d+)'\s*([\d.]+)\s*([NSEW])$/i);
+          const parts = cleaned.match(/^(\d+)°\s*(\d+)'s*([\d.]+)\s*([NSEW])$/i);
           if (!parts) return null;
           const [_, d, m, s, dir] = parts;
           let dec = Number(d) + Number(m)/60 + Number(s)/3600;
@@ -146,7 +171,7 @@ $conexion->close();
           return dec;
         }
 
-        const coordsDMS = <?php echo json_encode($fila['cordenadas'] ?? ''); ?>;
+        const coordsDMS = <?= json_encode($fila['cordenadas'] ?? '') ?>;
 
         if (!coordsDMS || coordsDMS.trim() === '') {
           document.getElementById('map').innerHTML = '<div class="map-error">Ubicación no disponible</div>';
@@ -157,20 +182,32 @@ $conexion->close();
             const lng = dmsToDecimal(lngDMS);
             if (lat === null || lng === null) throw new Error('Coordenadas inválidas');
 
-            const map = L.map('map').setView([lat, lng], 18);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            const map = L.map('map').setView([24.15277778, -110.245305], 15);
+
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
               maxZoom: 19,
-              attribution: '&copy; OpenStreetMap'
+              attribution: '© OpenStreetMap'
             }).addTo(map);
-            L.marker([lat, lng]).addTo(map)
-              .bindPopup('<?php echo htmlspecialchars($fila['nombre']." ".$fila['apellidoPaterno']); ?>')
+
+            const tombIcon = L.icon({
+              iconUrl: 'https://cdn-icons-png.flaticon.com/512/15081/15081676.png',
+              iconSize: [32, 32],
+              iconAnchor: [16, 32],
+              popupAnchor: [0, -32]
+            });
+
+            L.marker([lat, lng], { icon: tombIcon })
+              .addTo(map)
+              .bindPopup('<?= htmlspecialchars($fila['nombre'] . " " . $fila['apellidoPaterno']) ?>')
               .openPopup();
+
           } catch (e) {
             console.error(e);
             document.getElementById('map').innerHTML = '<div class="map-error">Error al mostrar la ubicación</div>';
           }
         }
       </script>
+
     </div>
   </main>
 

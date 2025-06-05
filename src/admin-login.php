@@ -8,6 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $correo = $_POST['correo'] ?? '';
     $pass   = $_POST['pass']   ?? '';
 
+    // Buscamos al admin que tenga este correo
     $sql  = "SELECT id, correo, contraseña FROM admins WHERE correo = ?";
     $stmt = $conexion->prepare($sql);
     $stmt->bind_param("s", $correo);
@@ -16,6 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($result->num_rows === 1) {
         $usuario = $result->fetch_assoc();
+        // Aquí comparamos en texto plano
         if ($pass === $usuario['contraseña']) {
             $_SESSION['usuario_id'] = $usuario['id'];
             header("Location: admin-tumbas.php");
