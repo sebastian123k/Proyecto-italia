@@ -1,5 +1,4 @@
 <?php
-// admin-localizacion.php
 session_start();
 require '../php/conection.php';
 
@@ -51,7 +50,7 @@ $conexion->close();
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Victorio Grave Search – Localización</title>
+  <title>Victorio Grave Search – Localización</title>
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
@@ -90,16 +89,40 @@ $conexion->close();
     .btn-gold:hover {
       background-color: #b5982f;
     }
+    .icono-usuario {
+      width: 24px;
+      height: 24px;
+    }
   </style>
 </head>
 
 <body>
-  <nav class="navbar navbar-dark bg-dark shadow-sm">
-    <div class="container-fluid">
-      <a class="navbar-brand d-flex align-items-center" href="../index.html">
-        <img src="../img/logo.png" alt="logo" width="40" height="40" class="me-2">
-        Victorio Grave Search
-      </a>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm px-4">
+    <a class="navbar-brand d-flex align-items-center" href="../index.php">
+      <img src="../img/logo.png" alt="logo" width="40" height="40" class="me-2">
+      <span class="fs-4 fw-bold">Victorio Grave Search</span>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+      <ul class="navbar-nav">
+        <?php if (isset($_SESSION['usuario_id'])): ?>
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center" href="configuracion-usuario.php">
+              <i class="fas fa-user icono-usuario me-1"></i>
+              <?php echo htmlspecialchars($_SESSION['usuario_nombre']); ?>
+            </a>
+          </li>
+        <?php else: ?>
+          <li class="nav-item">
+            <a class="nav-link" href="inicion-sesion-usuarios.php">Iniciar Sesión</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="registro-usuarios.php">Registrarse</a>
+          </li>
+        <?php endif; ?>
+      </ul>
     </div>
   </nav>
 
@@ -142,7 +165,7 @@ $conexion->close();
           <!-- Número opcional -->
           <div class="col-md-6">
             <label class="form-label">Número (opcional)</label>
-            <input type="text" id="numero" name="numero" class="form-control" placeholder="Ej. 33">
+            <input type="text" id="numero" name="numero" class="form-control" placeholder="Ej. 33">
           </div>
         </div>
         <div class="d-flex justify-content-end gap-2 mt-4">
@@ -155,7 +178,7 @@ $conexion->close();
   </main>
 
   <footer class="bg-dark text-white text-center py-3">
-    © 2025 Cementerio Perlas de La Paz — Todos los derechos reservados.
+    © 2025 Cementerio Perlas de La Paz — Todos los derechos reservados.
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -169,7 +192,7 @@ $conexion->close();
     // 2) Convertir DMS a decimal (para marcadores de difuntos)
     function dmsToDecimal(dms) {
       if (!dms) return null;
-      // Acepta: 24°09'10.4"N  o 24° 09' 10.4 N (con o sin comillas)
+      // Acepta: 24°09'10.4"N  o 24° 09'  10.4 N (con o sin comillas)
       const parts = dms.match(/(\d+)°\s*(\d+)'s*([\d.]+)"?\s*([NSEW])/i);
       if (!parts) return null;
       let deg = parseFloat(parts[1]);
@@ -267,7 +290,7 @@ $conexion->close();
     const map = L.map('map').setView([24.15277778, -110.245305], 15);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
       maxZoom: 19,
-      attribution: '© OpenStreetMap'
+      attribution: '© OpenStreetMap'
     }).addTo(map);
 
     // 6) Ícono de lápida (PNG de tumba)
@@ -282,12 +305,7 @@ $conexion->close();
 
     // 7) Dibuja rectángulo usando las cuatro esquinas, cada esquina en DMS "latDMS lonDMS"
     function drawRectCornersDMS(c1, c2, c3, c4, color) {
-      // c1: "latDMS lonDMS" (NW)
-      // c2: "latDMS lonDMS" (NE)
-      // c3: "latDMS lonDMS" (SE)
-      // c4: "latDMS lonDMS" (SW)
       function parseCorner(cornerStr) {
-        // cornerStr ≈ "24°09'10.4\"N 110°14'46.6\"W"
         const parts = cornerStr.trim().split(/\s+/);
         if (parts.length < 2) return [null, null];
         const lat = dmsToDecimal(parts[0]);

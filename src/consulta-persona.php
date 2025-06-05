@@ -1,3 +1,6 @@
+<?php
+session_start();
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -8,13 +11,41 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <link rel="stylesheet" href="../css/consulta-persona.css" />
+  <style>
+    .icono-usuario {
+      width: 24px;
+      height: 24px;
+    }
+  </style>
 </head>
 <body>
 
-<nav class="navbar navbar-dark bg-dark shadow-sm px-4">
-  <div class="d-flex align-items-center">
-    <a href="../index.html"><img src="../img/logo.png" alt="logo" class="me-2" width="40" height="40" /></a>
-    <span class="navbar-brand fs-4 fw-bold">Victorio Grave Search</span>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm px-4">
+  <a class="navbar-brand d-flex align-items-center" href="../index.php">
+    <img src="../img/logo.png" alt="logo" class="me-2" width="40" height="40" />
+    <span class="fs-4 fw-bold">Victorio Grave Search</span>
+  </a>
+  <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+    <ul class="navbar-nav">
+      <?php if (isset($_SESSION['usuario_id'])): ?>
+        <li class="nav-item">
+          <a class="nav-link d-flex align-items-center" href="configuracion-usuario.php">
+            <i class="fas fa-user icono-usuario me-1"></i>
+            <?php echo htmlspecialchars($_SESSION['usuario_nombre']); ?>
+          </a>
+        </li>
+      <?php else: ?>
+        <li class="nav-item">
+          <a class="nav-link" href="inicion-sesion-usuarios.php">Iniciar Sesión</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="registro-usuarios.php">Registrarse</a>
+        </li>
+      <?php endif; ?>
+    </ul>
   </div>
 </nav>
 
