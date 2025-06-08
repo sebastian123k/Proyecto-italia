@@ -171,11 +171,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 if (isset($_GET['eliminar'])) {
     $elim_id = (int)$_GET['eliminar'];
     if ($elim_id > 0) {
+        // Primero actualizamos los difuntos que tienen esa tumba
+        $stmt_update = $conexion->prepare("UPDATE difuntos SET idTumba = -1 WHERE idTumba = ?");
+        $stmt_update->bind_param("i", $elim_id);
+        $stmt_update->execute();
+        $stmt_update->close();
+
+        // Luego eliminamos la tumba
         $stmt = $conexion->prepare("DELETE FROM tumbas WHERE id = ?");
         $stmt->bind_param("i", $elim_id);
         $stmt->execute();
         $stmt->close();
-        $success = 'Tumba eliminada.';
+
+        $success = 'Tumba eliminada y difuntos actualizados.';
     }
 }
 
@@ -234,25 +242,96 @@ $conexion->close();
     .table-hover tbody tr:hover { background-color: rgba(0,0,0,0.05); }
     .btn-gold { background: #d4af37; color: black; }
     .btn-gold:hover { background: #b5982f; }
+
+    .sidebar-custom {
+  background-color: #212529; /* negro Bootstrap */
+  color: white;
+  height: auto;
+}
+
+@media (min-width: 768px) {
+  .sidebar-custom {
+    min-height: 100vh;
+    position: sticky;
+    top: 0;
+  }
+}
+
+.sidebar-custom a {
+  display: block;
+  padding: 0.5rem 1rem;
+  text-decoration: none;
+  border-radius: 4px;
+  color: white;
+}
+
+.sidebar-custom a.active {
+  background-color: #ffc107; /* dorado */
+  color: #000;
+}
+
+.sidebar-custom a:hover {
+  background-color: #343a40; /* gris muy oscuro */
+  color: white;
+}
+
   </style>
 </head>
 <body>
 
 <div class="container-fluid">
   <div class="row">
-    <!-- Barra lateral -->
-    <nav class="col-md-3 col-lg-2 sidebar">
+    <!-- Sidebar estático SOLO en md+ -->
+    <nav class="d-none d-md-flex col-md-3 col-lg-2 bg-dark text-white p-3 flex-column sidebar-custom">
       <div class="text-center mb-4">
         <img src="../img/logo.png" width="40" alt="Logo">
         <div class="text-gold fw-bold mt-2">Victorio's</div>
         <small>grave search</small>
       </div>
-      <a href="admin-usuarios.php">Usuarios</a>
-      <a href="admin-tumbas.php" class="active">Tumbas</a>
-      <a href="admin-difuntos.php">Difuntos</a>
-      <a href="admin-ubicaciones.php">Ubicaciones</a>
+      <a href="admin-usuarios.php" class="text-white mb-2">Administradores</a>
+      <a href="admin-tumbas.php" class="text-white mb-2 active">Tumbas</a>
+      <a href="admin-difuntos.php" class="text-white mb-2">Difuntos</a>
+      <a href="admin-ubicaciones.php" class="text-white mb-2">Ubicaciones</a>
       <a href="logout.php" class="text-danger mt-4">Cerrar Sesión</a>
     </nav>
+
+    <!-- Offcanvas SOLO en móvil -->
+    <div class="d-md-none">
+      <!-- Botón toggle -->
+      <button class="btn btn-dark m-2" type="button"
+              data-bs-toggle="offcanvas" data-bs-target="#mobileMenu"
+              aria-controls="mobileMenu">
+        ☰ Menú
+      </button>
+
+      <!-- Offcanvas panel -->
+      <div class="offcanvas offcanvas-start" tabindex="-1" id="mobileMenu"
+           aria-labelledby="mobileMenuLabel">
+        <div class="offcanvas-header bg-dark text-white">
+          <h5 class="offcanvas-title" id="mobileMenuLabel">Menú</h5>
+          <button type="button" class="btn-close btn-close-white"
+                  data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
+        </div>
+        <div class="offcanvas-body bg-dark text-white p-3">
+          <div class="text-center mb-4">
+            <img src="../img/logo.png" width="40" alt="Logo">
+            <div class="text-gold fw-bold mt-2">Victorio's</div>
+            <small>grave search</small>
+          </div>
+          <a href="admin-usuarios.php" class="text-white mb-2">Administradores</a>
+          <a href="admin-tumbas.php" class="text-white mb-2 active">Tumbas</a>
+          <a href="admin-difuntos.php" class="text-white mb-2">Difuntos</a>
+          <a href="admin-ubicaciones.php" class="text-white mb-2">Ubicaciones</a>
+          <a href="logout.php" class="text-danger mt-4">Cerrar Sesión</a>
+        </div>
+      </div>
+    </div>
+
+  
+ 
+
+<!-- Bootstrap JS (incluye Popper) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Contenido principal -->
     <main class="col-md-9 col-lg-10 p-4">
@@ -309,11 +388,18 @@ $conexion->close();
         </div>
 
         <!-- 1.5 Coordenadas -->
-        <div class="col-md-6">
-          <label class="form-label">Coordenadas</label>
-          <input type="text" name="cordenadas" class="form-control"
-                 placeholder="Ej: 24°09'10.3&quot;N 110°14'46.6&quot;W">
-        </div>
+ <div class="col-md-6">
+    <label class="form-label">Coordenadas</label>
+    <input type="text" name="cordenadas" class="form-control"
+           placeholder="Ej: 24°09'10.3&quot;N 110°14'46.6&quot;W">
+    <!-- Link inmediatamente debajo, sin margen extra -->
+    <a href="https://www.google.com/maps/place/24%C2%B009'11.1%22N+110%C2%B014'43.7%22W/@24.1530655,-110.2455975,17z/data=!4m4!3m3!8m2!3d24.15309!4d-110.245458?entry=ttu&g_ep=EgoyMDI1MDYwNC4wIKXMDSoASAFQAw%3D%3D"
+       target="_blank"
+       class="d-block text-center text-decoration-none mt-1 small text-primary">
+      🔍 Buscar en mapa
+    </a>
+  </div>
+
 
         <div class="col-12">
           <button type="submit" class="btn btn-dark">Registrar Tumba</button>
@@ -536,6 +622,7 @@ $conexion->close();
     </main>
   </div>
 </div>
+
 
 <!-- ====================================== -->
 <!-- 6. JavaScript para cascada de selects   -->

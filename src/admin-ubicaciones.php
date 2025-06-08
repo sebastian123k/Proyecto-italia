@@ -431,25 +431,84 @@ $conexion->close();
     .btn-gold { background: #d4af37; color: black; }
     .btn-gold:hover { background: #b5982f; }
     .tab-pane { padding-top: 1rem; }
+
+    @media (min-width: 768px) {
+  .sidebar-custom {
+    min-height: 100vh;
+    position: sticky;
+    top: 0;
+  }
+}
+
+.sidebar-custom a {
+  display: block;
+  padding: 0.5rem 1rem;
+  text-decoration: none;
+  border-radius: 4px;
+  color: white;
+}
+
+.sidebar-custom a.active {
+  background-color: #ffc107; /* dorado */
+  color: #000;
+}
+
+.sidebar-custom a:hover {
+  background-color: #343a40; /* gris muy oscuro */
+  color: white;
+}
   </style>
 </head>
 <body>
 
 <div class="container-fluid">
   <div class="row">
-    <!-- Sidebar -->
-    <nav class="col-md-3 col-lg-2 sidebar">
+    <!-- Sidebar estático SOLO en md+ -->
+    <nav class="d-none d-md-flex col-md-3 col-lg-2 bg-dark text-white p-3 flex-column sidebar-custom">
       <div class="text-center mb-4">
-        <img src="../img/logo.png" width="40" alt="Logo" />
+        <img src="../img/logo.png" width="40" alt="Logo">
         <div class="text-gold fw-bold mt-2">Victorio's</div>
         <small>grave search</small>
       </div>
-      <a href="admin-usuarios.php">Usuarios</a>
-      <a href="admin-tumbas.php">Tumbas</a>
-      <a href="admin-difuntos.php">Difuntos</a>
-      <a href="admin-ubicaciones.php" class="active">Ubicaciones</a>
+      <a href="admin-usuarios.php" class="text-white mb-2">Administradores</a>
+      <a href="admin-tumbas.php" class="text-white mb-2 ">Tumbas</a>
+      <a href="admin-difuntos.php" class="text-white mb-2 ">Difuntos</a>
+      <a href="admin-ubicaciones.php" class="text-white mb-2 active">Ubicaciones</a>
       <a href="logout.php" class="text-danger mt-4">Cerrar Sesión</a>
     </nav>
+
+    <!-- Offcanvas SOLO en móvil -->
+    <div class="d-md-none">
+      <!-- Botón toggle -->
+      <button class="btn btn-dark m-2" type="button"
+              data-bs-toggle="offcanvas" data-bs-target="#mobileMenu"
+              aria-controls="mobileMenu">
+        ☰ Menú
+      </button>
+
+      <!-- Offcanvas panel -->
+      <div class="offcanvas offcanvas-start" tabindex="-1" id="mobileMenu"
+           aria-labelledby="mobileMenuLabel">
+        <div class="offcanvas-header bg-dark text-white">
+          <h5 class="offcanvas-title" id="mobileMenuLabel">Menú</h5>
+          <button type="button" class="btn-close btn-close-white"
+                  data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
+        </div>
+        <div class="offcanvas-body bg-dark text-white p-3">
+          <div class="text-center mb-4">
+            <img src="../img/logo.png" width="40" alt="Logo">
+            <div class="text-gold fw-bold mt-2">Victorio's</div>
+            <small>grave search</small>
+          </div>
+          <a href="admin-usuarios.php" class="text-white mb-2 ">Administradores</a>
+          <a href="admin-tumbas.php" class="text-white mb-2 ">Tumbas</a>
+          <a href="admin-difuntos.php" class="text-white mb-2">Difuntos</a>
+          <a href="admin-ubicaciones.php" class="text-white mb-2 active">Ubicaciones</a>
+          <a href="logout.php" class="text-danger mt-4">Cerrar Sesión</a>
+        </div>
+      </div>
+    </div>
+
 
     <!-- Contenido principal -->
     <main class="col-md-9 col-lg-10 p-4">
@@ -523,18 +582,38 @@ $conexion->close();
             <div class="col-md-3">
               <label class="form-label">Cordenada 1</label>
               <input type="text" name="man_cordenada1" class="form-control" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
+               <a href="https://www.google.com/maps/place/24%C2%B009'11.1%22N+110%C2%B014'43.7%22W/@24.1530655,-110.2455975,17z/data=!4m4!3m3!8m2!3d24.15309!4d-110.245458?entry=ttu&g_ep=EgoyMDI1MDYwNC4wIKXMDSoASAFQAw%3D%3D"
+                target="_blank"
+                class="d-block text-center text-decoration-none mt-1 small text-primary">
+                🔍 Buscar en mapa
+              </a>
             </div>
             <div class="col-md-3">
               <label class="form-label">Cordenada 2</label>
               <input type="text" name="man_cordenada2" class="form-control" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
+              <a href="https://www.google.com/maps/place/24%C2%B009'11.1%22N+110%C2%B014'43.7%22W/@24.1530655,-110.2455975,17z/data=!4m4!3m3!8m2!3d24.15309!4d-110.245458?entry=ttu&g_ep=EgoyMDI1MDYwNC4wIKXMDSoASAFQAw%3D%3D"
+                target="_blank"
+                class="d-block text-center text-decoration-none mt-1 small text-primary">
+                🔍 Buscar en mapa
+              </a>
             </div>
             <div class="col-md-3">
               <label class="form-label">Cordenada 3</label>
               <input type="text" name="man_cordenada3" class="form-control" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
+              <a href="https://www.google.com/maps/place/24%C2%B009'11.1%22N+110%C2%B014'43.7%22W/@24.1530655,-110.2455975,17z/data=!4m4!3m3!8m2!3d24.15309!4d-110.245458?entry=ttu&g_ep=EgoyMDI1MDYwNC4wIKXMDSoASAFQAw%3D%3D"
+                target="_blank"
+                class="d-block text-center text-decoration-none mt-1 small text-primary">
+                🔍 Buscar en mapa
+              </a>
             </div>
             <div class="col-md-3">
               <label class="form-label">Cordenada 4</label>
               <input type="text" name="man_cordenada4" class="form-control" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
+              <a href="https://www.google.com/maps/place/24%C2%B009'11.1%22N+110%C2%B014'43.7%22W/@24.1530655,-110.2455975,17z/data=!4m4!3m3!8m2!3d24.15309!4d-110.245458?entry=ttu&g_ep=EgoyMDI1MDYwNC4wIKXMDSoASAFQAw%3D%3D"
+                target="_blank"
+                class="d-block text-center text-decoration-none mt-1 small text-primary">
+                🔍 Buscar en mapa
+              </a>
             </div>
             <div class="col-12">
               <button type="submit" class="btn btn-dark">Registrar Manzana</button>
@@ -624,18 +703,38 @@ $conexion->close();
                                 <div class="mb-3">
                                   <label class="form-label">Cordenada 1</label>
                                   <input type="text" name="man_cordenada1" class="form-control" value="<?= htmlspecialchars($m['cordenada1']) ?>" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
+                                  <a href="https://www.google.com/maps/place/24%C2%B009'11.1%22N+110%C2%B014'43.7%22W/@24.1530655,-110.2455975,17z/data=!4m4!3m3!8m2!3d24.15309!4d-110.245458?entry=ttu&g_ep=EgoyMDI1MDYwNC4wIKXMDSoASAFQAw%3D%3D"
+                                    target="_blank"
+                                    class="d-block text-center text-decoration-none mt-1 small text-primary">
+                                    🔍 Buscar en mapa
+                                  </a>
                                 </div>
                                 <div class="mb-3">
                                   <label class="form-label">Cordenada 2</label>
                                   <input type="text" name="man_cordenada2" class="form-control" value="<?= htmlspecialchars($m['cordenada2']) ?>" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
+                                  <a href="https://www.google.com/maps/place/24%C2%B009'11.1%22N+110%C2%B014'43.7%22W/@24.1530655,-110.2455975,17z/data=!4m4!3m3!8m2!3d24.15309!4d-110.245458?entry=ttu&g_ep=EgoyMDI1MDYwNC4wIKXMDSoASAFQAw%3D%3D"
+                                    target="_blank"
+                                    class="d-block text-center text-decoration-none mt-1 small text-primary">
+                                    🔍 Buscar en mapa
+                                  </a>
                                 </div>
                                 <div class="mb-3">
                                   <label class="form-label">Cordenada 3</label>
                                   <input type="text" name="man_cordenada3" class="form-control" value="<?= htmlspecialchars($m['cordenada3']) ?>" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
+                                  <a href="https://www.google.com/maps/place/24%C2%B009'11.1%22N+110%C2%B014'43.7%22W/@24.1530655,-110.2455975,17z/data=!4m4!3m3!8m2!3d24.15309!4d-110.245458?entry=ttu&g_ep=EgoyMDI1MDYwNC4wIKXMDSoASAFQAw%3D%3D"
+                                    target="_blank"
+                                    class="d-block text-center text-decoration-none mt-1 small text-primary">
+                                    🔍 Buscar en mapa
+                                  </a>
                                 </div>
                                 <div class="mb-3">
                                   <label class="form-label">Cordenada 4</label>
                                   <input type="text" name="man_cordenada4" class="form-control" value="<?= htmlspecialchars($m['cordenada4']) ?>" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
+                                  <a href="https://www.google.com/maps/place/24%C2%B009'11.1%22N+110%C2%B014'43.7%22W/@24.1530655,-110.2455975,17z/data=!4m4!3m3!8m2!3d24.15309!4d-110.245458?entry=ttu&g_ep=EgoyMDI1MDYwNC4wIKXMDSoASAFQAw%3D%3D"
+                                    target="_blank"
+                                    class="d-block text-center text-decoration-none mt-1 small text-primary">
+                                    🔍 Buscar en mapa
+                                  </a>
                                 </div>
                               </div>
                               <div class="modal-footer">
@@ -676,18 +775,38 @@ $conexion->close();
             <div class="col-md-3">
               <label class="form-label">Cordenada 1</label>
               <input type="text" name="fila_cordenada1" class="form-control" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
+              <a href="https://www.google.com/maps/place/24%C2%B009'11.1%22N+110%C2%B014'43.7%22W/@24.1530655,-110.2455975,17z/data=!4m4!3m3!8m2!3d24.15309!4d-110.245458?entry=ttu&g_ep=EgoyMDI1MDYwNC4wIKXMDSoASAFQAw%3D%3D"
+                target="_blank"
+                class="d-block text-center text-decoration-none mt-1 small text-primary">
+                🔍 Buscar en mapa
+              </a>
             </div>
             <div class="col-md-3">
               <label class="form-label">Cordenada 2</label>
               <input type="text" name="fila_cordenada2" class="form-control" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
+              <a href="https://www.google.com/maps/place/24%C2%B009'11.1%22N+110%C2%B014'43.7%22W/@24.1530655,-110.2455975,17z/data=!4m4!3m3!8m2!3d24.15309!4d-110.245458?entry=ttu&g_ep=EgoyMDI1MDYwNC4wIKXMDSoASAFQAw%3D%3D"
+                target="_blank"
+                class="d-block text-center text-decoration-none mt-1 small text-primary">
+                🔍 Buscar en mapa
+              </a>
             </div>
             <div class="col-md-3">
               <label class="form-label">Cordenada 3</label>
               <input type="text" name="fila_cordenada3" class="form-control" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
+              <a href="https://www.google.com/maps/place/24%C2%B009'11.1%22N+110%C2%B014'43.7%22W/@24.1530655,-110.2455975,17z/data=!4m4!3m3!8m2!3d24.15309!4d-110.245458?entry=ttu&g_ep=EgoyMDI1MDYwNC4wIKXMDSoASAFQAw%3D%3D"
+                target="_blank"
+                class="d-block text-center text-decoration-none mt-1 small text-primary">
+                🔍 Buscar en mapa
+              </a>
             </div>
             <div class="col-md-3">
               <label class="form-label">Cordenada 4</label>
               <input type="text" name="fila_cordenada4" class="form-control" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
+              <a href="https://www.google.com/maps/place/24%C2%B009'11.1%22N+110%C2%B014'43.7%22W/@24.1530655,-110.2455975,17z/data=!4m4!3m3!8m2!3d24.15309!4d-110.245458?entry=ttu&g_ep=EgoyMDI1MDYwNC4wIKXMDSoASAFQAw%3D%3D"
+                target="_blank"
+                class="d-block text-center text-decoration-none mt-1 small text-primary">
+                🔍 Buscar en mapa
+              </a>
             </div>
             <div class="col-md-3">
               <label class="form-label">Manzana <span class="text-danger">*</span></label>
@@ -733,52 +852,51 @@ $conexion->close();
             </form>
           </div>
 
-          <!-- 2.3 Tabla Filas -->
           <div class="bg-white rounded shadow p-3">
-            <h5 class="fw-semibold mb-3">Listado de Filas</h5>
-            <div class="table-responsive">
-              <table class="table table-hover align-middle text-center">
-                <thead class="table-dark">
-                  <tr>
-                    <th>ID</th>
-                    <th>Número</th>
-                    <th>C1</th>
-                    <th>C2</th>
-                    <th>C3</th>
-                    <th>C4</th>
-                    <th>ID Manzana</th>
-                    <th>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <?php if (empty($filas)): ?>
-                    <tr>
-                      <td colspan="8">No se encontraron filas.</td>
-                    </tr>
-                  <?php else: ?>
-                    <?php foreach ($filas as $f): ?>
-                      <tr>
-                        <td><?= htmlspecialchars($f['id']) ?></td>
-                        <td><?= htmlspecialchars($f['numero']) ?></td>
-                        <td><?= htmlspecialchars($f['cordenada1']) ?></td>
-                        <td><?= htmlspecialchars($f['cordenada2']) ?></td>
-                        <td><?= htmlspecialchars($f['cordenada3']) ?></td>
-                        <td><?= htmlspecialchars($f['cordenada4']) ?></td>
-                        <td><?= htmlspecialchars($f['idManzana']) ?></td>
-                        <td>
-                          <a href="?eliminar-fila=<?= $f['id'] ?>"
-                             class="text-danger me-3"
-                             onclick="return confirm('¿Eliminar esta fila?')">
-                            Eliminar
-                          </a>
-                          <button
-                            class="btn btn-sm btn-outline-primary"
-                            data-bs-toggle="modal"
-                            data-bs-target="#editFilaModal<?= $f['id'] ?>">
-                            Editar
-                          </button>
-                        </td>
-                      </tr>
+  <h5 class="fw-semibold mb-3">Listado de Filas</h5>
+  <div class="table-responsive">
+    <table class="table table-striped table-hover table-sm align-middle text-center text-nowrap">
+      <thead class="table-dark">
+        <tr>
+          <th class="px-2">ID</th>
+          <th class="px-2">Número</th>
+          <th class="px-2">C1</th>
+          <th class="px-2">C2</th>
+          <th class="px-2">C3</th>
+          <th class="px-2">C4</th>
+          <th class="px-2">ID Manzana</th>
+          <th class="px-2">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php if (empty($filas)): ?>
+          <tr>
+            <td colspan="8">No se encontraron filas.</td>
+          </tr>
+        <?php else: ?>
+          <?php foreach ($filas as $f): ?>
+            <tr>
+              <td><?= htmlspecialchars($f['id']) ?></td>
+              <td><?= htmlspecialchars($f['numero']) ?></td>
+              <td><?= htmlspecialchars($f['cordenada1']) ?></td>
+              <td><?= htmlspecialchars($f['cordenada2']) ?></td>
+              <td><?= htmlspecialchars($f['cordenada3']) ?></td>
+              <td><?= htmlspecialchars($f['cordenada4']) ?></td>
+              <td><?= htmlspecialchars($f['idManzana']) ?></td>
+              <td>
+                <a href="?eliminar-fila=<?= $f['id'] ?>"
+                   class="text-danger me-3"
+                   onclick="return confirm('¿Eliminar esta fila?')">
+                  Eliminar
+                </a>
+                <button
+                  class="btn btn-sm btn-outline-primary"
+                  data-bs-toggle="modal"
+                  data-bs-target="#editFilaModal<?= $f['id'] ?>">
+                  Editar
+                </button>
+              </td>
+            </tr>
 
                       <!-- Modal Edición Fila -->
                       <div class="modal fade" id="editFilaModal<?= $f['id'] ?>" tabindex="-1" aria-labelledby="editFilaLabel<?= $f['id'] ?>" aria-hidden="true">
@@ -799,18 +917,38 @@ $conexion->close();
                                 <div class="mb-3">
                                   <label class="form-label">Cordenada 1</label>
                                   <input type="text" name="fila_cordenada1" class="form-control" value="<?= htmlspecialchars($f['cordenada1']) ?>" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
+                                  <a href="https://www.google.com/maps/place/24%C2%B009'11.1%22N+110%C2%B014'43.7%22W/@24.1530655,-110.2455975,17z/data=!4m4!3m3!8m2!3d24.15309!4d-110.245458?entry=ttu&g_ep=EgoyMDI1MDYwNC4wIKXMDSoASAFQAw%3D%3D"
+                                    target="_blank"
+                                    class="d-block text-center text-decoration-none mt-1 small text-primary">
+                                    🔍 Buscar en mapa
+                                  </a>
                                 </div>
                                 <div class="mb-3">
                                   <label class="form-label">Cordenada 2</label>
                                   <input type="text" name="fila_cordenada2" class="form-control" value="<?= htmlspecialchars($f['cordenada2']) ?>" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
+                                   <a href="https://www.google.com/maps/place/24%C2%B009'11.1%22N+110%C2%B014'43.7%22W/@24.1530655,-110.2455975,17z/data=!4m4!3m3!8m2!3d24.15309!4d-110.245458?entry=ttu&g_ep=EgoyMDI1MDYwNC4wIKXMDSoASAFQAw%3D%3D"
+                                    target="_blank"
+                                    class="d-block text-center text-decoration-none mt-1 small text-primary">
+                                    🔍 Buscar en mapa
+                                  </a>
                                 </div>
                                 <div class="mb-3">
                                   <label class="form-label">Cordenada 3</label>
                                   <input type="text" name="fila_cordenada3" class="form-control" value="<?= htmlspecialchars($f['cordenada3']) ?>" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
+                                   <a href="https://www.google.com/maps/place/24%C2%B009'11.1%22N+110%C2%B014'43.7%22W/@24.1530655,-110.2455975,17z/data=!4m4!3m3!8m2!3d24.15309!4d-110.245458?entry=ttu&g_ep=EgoyMDI1MDYwNC4wIKXMDSoASAFQAw%3D%3D"
+                                    target="_blank"
+                                    class="d-block text-center text-decoration-none mt-1 small text-primary">
+                                    🔍 Buscar en mapa
+                                  </a>
                                 </div>
                                 <div class="mb-3">
                                   <label class="form-label">Cordenada 4</label>
                                   <input type="text" name="fila_cordenada4" class="form-control" value="<?= htmlspecialchars($f['cordenada4']) ?>" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
+                                   <a href="https://www.google.com/maps/place/24%C2%B009'11.1%22N+110%C2%B014'43.7%22W/@24.1530655,-110.2455975,17z/data=!4m4!3m3!8m2!3d24.15309!4d-110.245458?entry=ttu&g_ep=EgoyMDI1MDYwNC4wIKXMDSoASAFQAw%3D%3D"
+                                    target="_blank"
+                                    class="d-block text-center text-decoration-none mt-1 small text-primary">
+                                    🔍 Buscar en mapa
+                                  </a>
                                 </div>
                                 <div class="mb-3">
                                   <label class="form-label">Manzana <span class="text-danger">*</span></label>
@@ -862,18 +1000,38 @@ $conexion->close();
             <div class="col-md-3">
               <label class="form-label">Cordenada 1</label>
               <input type="text" name="cua_cordenada1" class="form-control" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
+               <a href="https://www.google.com/maps/place/24%C2%B009'11.1%22N+110%C2%B014'43.7%22W/@24.1530655,-110.2455975,17z/data=!4m4!3m3!8m2!3d24.15309!4d-110.245458?entry=ttu&g_ep=EgoyMDI1MDYwNC4wIKXMDSoASAFQAw%3D%3D"
+                target="_blank"
+                class="d-block text-center text-decoration-none mt-1 small text-primary">
+                🔍 Buscar en mapa
+              </a>
             </div>
             <div class="col-md-3">
               <label class="form-label">Cordenada 2</label>
               <input type="text" name="cua_cordenada2" class="form-control" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
+              <a href="https://www.google.com/maps/place/24%C2%B009'11.1%22N+110%C2%B014'43.7%22W/@24.1530655,-110.2455975,17z/data=!4m4!3m3!8m2!3d24.15309!4d-110.245458?entry=ttu&g_ep=EgoyMDI1MDYwNC4wIKXMDSoASAFQAw%3D%3D"
+                target="_blank"
+                class="d-block text-center text-decoration-none mt-1 small text-primary">
+                🔍 Buscar en mapa
+              </a>
             </div>
             <div class="col-md-3">
               <label class="form-label">Cordenada 3</label>
               <input type="text" name="cua_cordenada3" class="form-control" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
+              <a href="https://www.google.com/maps/place/24%C2%B009'11.1%22N+110%C2%B014'43.7%22W/@24.1530655,-110.2455975,17z/data=!4m4!3m3!8m2!3d24.15309!4d-110.245458?entry=ttu&g_ep=EgoyMDI1MDYwNC4wIKXMDSoASAFQAw%3D%3D"
+                target="_blank"
+                class="d-block text-center text-decoration-none mt-1 small text-primary">
+                🔍 Buscar en mapa
+              </a>
             </div>
             <div class="col-md-3">
               <label class="form-label">Cordenada 4</label>
               <input type="text" name="cua_cordenada4" class="form-control" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
+              <a href="https://www.google.com/maps/place/24%C2%B009'11.1%22N+110%C2%B014'43.7%22W/@24.1530655,-110.2455975,17z/data=!4m4!3m3!8m2!3d24.15309!4d-110.245458?entry=ttu&g_ep=EgoyMDI1MDYwNC4wIKXMDSoASAFQAw%3D%3D"
+                target="_blank"
+                class="d-block text-center text-decoration-none mt-1 small text-primary">
+                🔍 Buscar en mapa
+              </a>
             </div>
             <div class="col-md-3">
               <label class="form-label">Fila <span class="text-danger">*</span></label>
@@ -987,18 +1145,38 @@ $conexion->close();
                                 <div class="mb-3">
                                   <label class="form-label">Cordenada 1</label>
                                   <input type="text" name="cua_cordenada1" class="form-control" value="<?= htmlspecialchars($c['cordenada1']) ?>" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
+                                  <a href="https://www.google.com/maps/place/24%C2%B009'11.1%22N+110%C2%B014'43.7%22W/@24.1530655,-110.2455975,17z/data=!4m4!3m3!8m2!3d24.15309!4d-110.245458?entry=ttu&g_ep=EgoyMDI1MDYwNC4wIKXMDSoASAFQAw%3D%3D"
+                                    target="_blank"
+                                    class="d-block text-center text-decoration-none mt-1 small text-primary">
+                                    🔍 Buscar en mapa
+                                  </a>
                                 </div>
                                 <div class="mb-3">
                                   <label class="form-label">Cordenada 2</label>
                                   <input type="text" name="cua_cordenada2" class="form-control" value="<?= htmlspecialchars($c['cordenada2']) ?>" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
+                                  <a href="https://www.google.com/maps/place/24%C2%B009'11.1%22N+110%C2%B014'43.7%22W/@24.1530655,-110.2455975,17z/data=!4m4!3m3!8m2!3d24.15309!4d-110.245458?entry=ttu&g_ep=EgoyMDI1MDYwNC4wIKXMDSoASAFQAw%3D%3D"
+                                    target="_blank"
+                                    class="d-block text-center text-decoration-none mt-1 small text-primary">
+                                    🔍 Buscar en mapa
+                                  </a>
                                 </div>
                                 <div class="mb-3">
                                   <label class="form-label">Cordenada 3</label>
                                   <input type="text" name="cua_cordenada3" class="form-control" value="<?= htmlspecialchars($c['cordenada3']) ?>" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
+                                  <a href="https://www.google.com/maps/place/24%C2%B009'11.1%22N+110%C2%B014'43.7%22W/@24.1530655,-110.2455975,17z/data=!4m4!3m3!8m2!3d24.15309!4d-110.245458?entry=ttu&g_ep=EgoyMDI1MDYwNC4wIKXMDSoASAFQAw%3D%3D"
+                                    target="_blank"
+                                    class="d-block text-center text-decoration-none mt-1 small text-primary">
+                                    🔍 Buscar en mapa
+                                  </a>
                                 </div>
                                 <div class="mb-3">
                                   <label class="form-label">Cordenada 4</label>
                                   <input type="text" name="cua_cordenada4" class="form-control" value="<?= htmlspecialchars($c['cordenada4']) ?>" placeholder="Ej. 24°09'10.0&quot;N 110°14'47.5&quot;W">
+                                  <a href="https://www.google.com/maps/place/24%C2%B009'11.1%22N+110%C2%B014'43.7%22W/@24.1530655,-110.2455975,17z/data=!4m4!3m3!8m2!3d24.15309!4d-110.245458?entry=ttu&g_ep=EgoyMDI1MDYwNC4wIKXMDSoASAFQAw%3D%3D"
+                                    target="_blank"
+                                    class="d-block text-center text-decoration-none mt-1 small text-primary">
+                                    🔍 Buscar en mapa
+                                  </a>
                                 </div>
                                 <div class="mb-3">
                                   <label class="form-label">Fila <span class="text-danger">*</span></label>

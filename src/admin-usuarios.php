@@ -31,7 +31,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Ya existe un administrador con ese correo';
         } else {
             $stmt->close();
-
             // Insertar nuevo admin
             $stmt = $conexion->prepare("INSERT INTO admins (Name, correo, contraseña) VALUES (?, ?, ?)");
             $stmt->bind_param("sss", $nombre, $correo, $contrasena);
@@ -66,11 +65,12 @@ if ($result = $conexion->query($sql)) {
 }
 $conexion->close();
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <!-- Meta viewport necesario para que el offcanvas funcione en móvil -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Panel Admin - Admins</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
@@ -81,25 +81,83 @@ $conexion->close();
     .active { background: #d4af37; color: black !important; }
     .text-gold { color: #d4af37; }
     .table-hover tbody tr:hover { background-color: rgba(0,0,0,0.05); }
+
+    @media (min-width: 768px) {
+      .sidebar-custom {
+        min-height: 100vh;
+        position: sticky;
+        top: 0;
+      }
+    }
+
+    .sidebar-custom a {
+      display: block;
+      padding: 0.5rem 1rem;
+      text-decoration: none;
+      border-radius: 4px;
+      color: white;
+    }
+
+    .sidebar-custom a.active {
+      background-color: #ffc107; /* dorado */
+      color: #000;
+    }
+
+    .sidebar-custom a:hover {
+      background-color: #343a40; /* gris muy oscuro */
+      color: white;
+    }
   </style>
 </head>
 <body>
 
 <div class="container-fluid">
   <div class="row">
-    <!-- Barra lateral -->
-    <nav class="col-md-3 col-lg-2 sidebar">
+    <!-- Sidebar estático SOLO en md+ -->
+    <nav class="d-none d-md-flex col-md-3 col-lg-2 bg-dark text-white p-3 flex-column sidebar-custom">
       <div class="text-center mb-4">
         <img src="../img/logo.png" width="40" alt="Logo">
         <div class="text-gold fw-bold mt-2">Victorio's</div>
         <small>grave search</small>
       </div>
-      <a href="admin-usuarios.php" class="active">Admins</a>
-      <a href="admin-tumbas.php">Tumbas</a>
-      <a href="admin-difuntos.php">Difuntos</a>
-      <a href="admin-ubicaciones.php">Ubicaciones</a>
+      <a href="admin-usuarios.php" class="text-white mb-2 active">Administradores</a>
+      <a href="admin-tumbas.php" class="text-white mb-2">Tumbas</a>
+      <a href="admin-difuntos.php" class="text-white mb-2">Difuntos</a>
+      <a href="admin-ubicaciones.php" class="text-white mb-2">Ubicaciones</a>
       <a href="logout.php" class="text-danger mt-4">Cerrar Sesión</a>
     </nav>
+
+    <!-- Offcanvas SOLO en móvil -->
+    <div class="d-md-none">
+      <!-- Botón toggle -->
+      <button class="btn btn-dark m-2" type="button"
+              data-bs-toggle="offcanvas" data-bs-target="#mobileMenu"
+              aria-controls="mobileMenu">
+        ☰ Menú
+      </button>
+
+      <!-- Offcanvas panel -->
+      <div class="offcanvas offcanvas-start" tabindex="-1" id="mobileMenu"
+           aria-labelledby="mobileMenuLabel">
+        <div class="offcanvas-header bg-dark text-white">
+          <h5 class="offcanvas-title" id="mobileMenuLabel">Menú</h5>
+          <button type="button" class="btn-close btn-close-white"
+                  data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
+        </div>
+        <div class="offcanvas-body bg-dark text-white p-3">
+          <div class="text-center mb-4">
+            <img src="../img/logo.png" width="40" alt="Logo">
+            <div class="text-gold fw-bold mt-2">Victorio's</div>
+            <small>grave search</small>
+          </div>
+          <a href="admin-usuarios.php" class="text-white mb-2 active">Administradores</a>
+          <a href="admin-tumbas.php" class="text-white mb-2">Tumbas</a>
+          <a href="admin-difuntos.php" class="text-white mb-2">Difuntos</a>
+          <a href="admin-ubicaciones.php" class="text-white mb-2">Ubicaciones</a>
+          <a href="logout.php" class="text-danger mt-4">Cerrar Sesión</a>
+        </div>
+      </div>
+    </div>
 
     <!-- Contenido principal -->
     <main class="col-md-9 col-lg-10 p-4">
@@ -160,5 +218,7 @@ $conexion->close();
   </div>
 </div>
 
+<!-- Bootstrap Bundle (incluye Popper) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
