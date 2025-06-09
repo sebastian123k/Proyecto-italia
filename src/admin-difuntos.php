@@ -257,6 +257,7 @@ $filterApeM        = trim($_GET['filterApeM']        ?? '');
 $filterRestos      = trim($_GET['filterRestos']      ?? '');
 $filterIdTumba     = trim($_GET['filterIdTumba']     ?? '');
 
+
 // ----------------------------------------------------
 // 5. Obtener lista con JOIN a proveedores
 // ----------------------------------------------------

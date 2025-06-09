@@ -1,5 +1,7 @@
 <?php
-session_start();
+require 'controlador-sesiones.php';
+
+
 require '../php/conection.php';
 
 if (!isset($_SESSION['usuario_id'])) {
@@ -93,6 +95,9 @@ $conexion->close();
     <img src="../img/logo.png" alt="logo" width="40" height="40" class="me-2" />
     Victorio Grave Search
   </a>
+  <div class="ms-auto">
+    <a href="cerrar-sesion-usuario.php" class="btn btn-outline-light">Cerrar sesión</a>
+  </div>
 </nav>
 
 <div class="config-card">

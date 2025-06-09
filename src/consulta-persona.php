@@ -1,5 +1,6 @@
 <?php
-session_start();
+require 'controlador-sesiones.php';
+
 ?>
 <!DOCTYPE html>
 <html lang="es">

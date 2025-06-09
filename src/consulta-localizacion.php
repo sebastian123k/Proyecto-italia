@@ -1,5 +1,5 @@
 <?php
-session_start();
+require 'controlador-sesiones.php';
 require '../php/conection.php';
 
 // ----------------------------------------------------
